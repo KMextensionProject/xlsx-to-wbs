@@ -43,6 +43,23 @@ public class Runner {
 			for (Iterator<Cell> cellIterator = row.cellIterator(); cellIterator.hasNext();) {
 				Cell cell = cellIterator.next();
 				String cellVal;
+				
+				// treba mapovanie stlpcov, moze to by v hociakom poradi..
+				switch(cell.getColumnIndex()) {
+				case 1:
+					break;
+				case 2:
+					break;
+				case 3:
+					break;
+				case 4:
+					break;
+				case 5:
+					break;
+				case 6:
+					break;
+				}
+
 				// I don't need the generated ID
 				if (cell.getColumnIndex() == 6) {
 					double percent = Double.parseDouble(XlsxUtils.getCellValue(cell));
@@ -50,6 +67,7 @@ public class Runner {
 				} else {
 					cellVal = XlsxUtils.getCellValue(cell);
 				}
+				
 				System.out.print(cellVal + ", ");
 			}
 			System.out.println();
