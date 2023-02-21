@@ -1,25 +1,28 @@
 package com.gti.activity;
 
+import static com.gti.util.StringUtils.EMPTY_STRING;
+
 public class Output {
 
 	private String name;
-	// co ak nie vsetky scenare/projekty budu mat boolean stav?
-	private boolean value;
+	private Boolean value;
 
 	public String getName() {
 		return name;
 	}
 
-	public boolean getValue() {
+	public Boolean getValue() {
 		return value;
 	}
 
 	public String getValueAsText() {
+		if (value == null) {
+			return EMPTY_STRING;
+		}
 		return value ? "Áno" : "Nie";
 	}
 
 	public boolean isEmpty() {
 		return name == null;
 	}
-
 }
