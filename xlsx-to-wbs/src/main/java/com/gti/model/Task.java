@@ -1,9 +1,9 @@
-package com.gti.activity;
+package com.gti.model;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class Task {
+public class Task extends NamedObject {
 
 	private String status; // one of TaskStatus should those two be static inner classes?
 	private String solver;
@@ -12,6 +12,14 @@ public class Task {
 	private LocalDate from;
 	private LocalDate to;
 	private Output output; // may be empty
+
+	public Task(String name) {
+		super(name);
+	}
+
+	public String getName() {
+		return this.name;
+	}
 
 	public String getStatus() {
 		return status;
@@ -84,7 +92,7 @@ public class Task {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(status, solver, output);
+		return Objects.hash(name, status, solver, output);
 	}
 
 	@Override
@@ -94,7 +102,8 @@ public class Task {
 		}
 		if (otherTask instanceof Task) {
 			Task other = (Task) otherTask;
-			if (Objects.equals(other.status, status)
+			if (Objects.equals(other.name, name)
+				&& Objects.equals(other.status, status)
 				&& Objects.equals(other.solver, solver)
 				&& Objects.equals(other.output, output)
 				&& Objects.equals(other.from, from)
@@ -109,7 +118,8 @@ public class Task {
 
 	@Override
 	public String toString() {
-		return "Task [status=" + status + ", "
+		return "Task [name=" + name + ", "
+			+ "status=" + status + ", "
 			+ "solver=" + solver + ", "
 			+ "priority=" + priority + ", "
 			+ "finishedInPercent=" + finishedInPercent + ", "

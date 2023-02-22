@@ -1,5 +1,6 @@
 package com.gti.enums;
 
+// make this an enum with hex color / style
 public class TaskStatus {
 
 	public static final String COMPLETED = "Dokončené";
