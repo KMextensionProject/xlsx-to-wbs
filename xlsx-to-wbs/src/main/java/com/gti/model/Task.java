@@ -3,9 +3,11 @@ package com.gti.model;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import com.gti.enums.TaskStatus;
+
 public class Task extends NamedObject {
 
-	private String status; // one of TaskStatus should those two be static inner classes?
+	private TaskStatus status; // TODO: one of TaskStatus
 	private String solver;
 	private int priority; // one of TaskPriority
 	private int finishedInPercent;
@@ -21,11 +23,11 @@ public class Task extends NamedObject {
 		return this.name;
 	}
 
-	public String getStatus() {
+	public TaskStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(TaskStatus status) {
 		this.status = status;
 	}
 

@@ -1,12 +1,32 @@
 package com.gti.enums;
 
-// make this an enum with hex color / style
-public class TaskStatus {
+import com.gti.util.StringUtils;
 
-	public static final String COMPLETED = "Dokončené";
-	public static final String ACCORDING_TO_PLAN = "Podľa plánu";
-	public static final String FUTURE_TASK = "Budúca úloha";
-	public static final String DELAYED = "Oneskorené";
-	public static final String CANCELED = "Zrušené";
+public enum TaskStatus {
 
+	COMPLETED("Dokončené", "[#lightgreen]"), 
+	ACCORDING_TO_PLAN("Podľa plánu", "[#SkyBlue]"), 
+	FUTURE_TASK("Budúca úloha", StringUtils.EMPTY_STRING), 
+	DELAYED("Oneskorené", "[#orange]"), 
+	CANCELED("Zrušené", "[#salmon]");
+
+	private String value;
+	private String colorCode;
+
+	private TaskStatus(String value) {
+		this(value, StringUtils.EMPTY_STRING);
+	}
+
+	private TaskStatus(String value, String colorCode) {
+		this.value = value;
+		this.colorCode = colorCode;
+	}
+
+	public String getValue() {
+		return this.value;
+	}
+
+	public String getColorCode() {
+		return this.colorCode;
+	}
 }

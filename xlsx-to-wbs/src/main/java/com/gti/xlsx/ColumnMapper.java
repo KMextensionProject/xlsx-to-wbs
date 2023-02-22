@@ -1,7 +1,7 @@
-package com.gti.util;
+package com.gti.xlsx;
 
 import static com.gti.util.StringUtils.stripDiacritics;
-import static com.gti.util.XlsxUtils.getCellValue;
+import static com.gti.xlsx.XlsxUtils.getCellValue;
 
 import java.util.HashMap;
 import java.util.Iterator;

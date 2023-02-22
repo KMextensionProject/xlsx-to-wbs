@@ -1,4 +1,6 @@
-package com.gti.util;
+package com.gti.xlsx;
+
+import com.gti.util.StringUtils;
 
 public class NoMappingFound extends RuntimeException {
 
