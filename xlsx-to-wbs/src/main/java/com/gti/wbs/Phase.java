@@ -1,9 +1,9 @@
-package com.gti.model;
+package com.gti.wbs;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Phase extends NamedObject {
+public class Phase extends WbsObject {
 
 	private List<Subactivity> subactivities;
 
@@ -18,7 +18,7 @@ public class Phase extends NamedObject {
 
 	@Override
 	public String toString() {
-		return "Phase [name=" + name + ", subactivities=" + subactivities + "]";
+		return "Phase [description=" + description + ", subactivities=" + subactivities + "]";
 	}
 
 }

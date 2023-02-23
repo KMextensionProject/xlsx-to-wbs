@@ -3,7 +3,7 @@ package com.gti.core;
 import java.io.IOException;
 import java.util.List;
 
-import com.gti.model.Activity;
+import com.gti.wbs.Activity;
 import com.gti.wbs.Wbs;
 import com.gti.xlsx.XlsxMetadata;
 

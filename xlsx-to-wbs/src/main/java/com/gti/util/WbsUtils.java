@@ -1,4 +1,4 @@
-package com.gti.wbs;
+package com.gti.util;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

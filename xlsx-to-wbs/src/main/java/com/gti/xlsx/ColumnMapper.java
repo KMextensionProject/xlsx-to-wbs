@@ -13,6 +13,8 @@ import org.apache.poi.ss.usermodel.Row;
 
 public class ColumnMapper {
 
+	// TODO: do i need this now?
+
 	// having inverse map will provide constant time bidirectional map
 	private final Map<String, Integer> nameIndexMap;
 	private final Map<Integer, String> indexNameMap;
@@ -30,7 +32,7 @@ public class ColumnMapper {
 	private void init(Row titleRow) {
 		for (Iterator<Cell> cellIterator = titleRow.cellIterator(); cellIterator.hasNext();) {
 			Cell cell = cellIterator.next();
-			String columnName = stripDiacritics(getCellValue(cell).toLowerCase());
+			String columnName = stripDiacritics(getCellValue(cell).asString().toLowerCase());
 			int columnIndex = cell.getColumnIndex();
 
 			// TODO: delete this, this is unwanted

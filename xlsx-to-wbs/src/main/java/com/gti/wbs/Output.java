@@ -1,9 +1,9 @@
-package com.gti.model;
+package com.gti.wbs;
 
 import static com.gti.util.StringUtils.EMPTY_STRING;
 
 // toto musi byt rozsirene o akceptaciu mirri -> to je ten true alebo false stlpec..inak vystup ma svoje vlastne meno
-public class Output extends NamedObject {
+public class Output extends WbsObject {
 
 	private Boolean value;
 
@@ -28,12 +28,12 @@ public class Output extends NamedObject {
 	}
 
 	public boolean isEmpty() {
-		return name == null;
+		return description == null;
 	}
 
 	@Override
 	public String toString() {
-		return "Output [name=" + name + "value=" + value + "]";
+		return "Output [description=" + description + "value=" + value + "]";
 	}
 
 }

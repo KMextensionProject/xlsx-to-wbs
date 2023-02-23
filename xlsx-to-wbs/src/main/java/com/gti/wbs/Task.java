@@ -1,26 +1,24 @@
-package com.gti.model;
+package com.gti.wbs;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 import com.gti.enums.TaskStatus;
 
-public class Task extends NamedObject {
+public class Task extends WbsObject {
 
-	private TaskStatus status; // TODO: one of TaskStatus
+	private TaskStatus status;
 	private String solver;
-	private int priority; // one of TaskPriority
+	private int priority;
 	private int finishedInPercent;
 	private LocalDate from;
 	private LocalDate to;
-	private Output output; // may be empty
+	private Output output;
 
 	public Task(String name) {
 		super(name);
-	}
-
-	public String getName() {
-		return this.name;
+		this.finishedInPercent = -1;
+		this.priority = -1;
 	}
 
 	public TaskStatus getStatus() {
@@ -94,7 +92,7 @@ public class Task extends NamedObject {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, status, solver, output);
+		return Objects.hash(description, status, solver, output);
 	}
 
 	@Override
@@ -104,7 +102,7 @@ public class Task extends NamedObject {
 		}
 		if (otherTask instanceof Task) {
 			Task other = (Task) otherTask;
-			if (Objects.equals(other.name, name)
+			if (Objects.equals(other.description, description)
 				&& Objects.equals(other.status, status)
 				&& Objects.equals(other.solver, solver)
 				&& Objects.equals(other.output, output)
@@ -120,7 +118,7 @@ public class Task extends NamedObject {
 
 	@Override
 	public String toString() {
-		return "Task [name=" + name + ", "
+		return "Task [name=" + description + ", "
 			+ "status=" + status + ", "
 			+ "solver=" + solver + ", "
 			+ "priority=" + priority + ", "

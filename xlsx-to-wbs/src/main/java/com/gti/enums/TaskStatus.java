@@ -29,4 +29,19 @@ public enum TaskStatus {
 	public String getColorCode() {
 		return this.colorCode;
 	}
+
+	public static TaskStatus getStatusByValue(String taskStatusValue) {
+		switch (taskStatusValue) {
+		case "Dokončené":
+			return TaskStatus.COMPLETED;
+		case "Zrušené":
+			return TaskStatus.CANCELED;
+		case "Oneskorené":
+			return TaskStatus.DELAYED;
+		case "Podľa plánu":
+			return TaskStatus.ACCORDING_TO_PLAN;
+		default:
+			return TaskStatus.FUTURE_TASK;	
+		}
+	}
 }
