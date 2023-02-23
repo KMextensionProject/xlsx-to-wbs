@@ -4,6 +4,7 @@ import java.util.Objects;
 
 public abstract class WbsObject {
 
+	protected String levelNumber;
 	protected String description;
 
 	public WbsObject(String name) {
@@ -31,6 +32,6 @@ public abstract class WbsObject {
 
 	@Override
 	public String toString() {
-		return "WbsObject [name=" + description + "]";
+		return "WbsObject [description=" + description + "]";
 	}
 }

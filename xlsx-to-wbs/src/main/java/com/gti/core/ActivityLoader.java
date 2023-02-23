@@ -59,12 +59,14 @@ public class ActivityLoader {
 			Activity activity = lookupActivity(activities, activityName);
 			if (activity == null) {
 				activity = new Activity(activityName);
+				//activity.setLevelNumber();
 				activities.add(activity);
 			}
 
 			Phase phase = lookupPhase(activity, phaseName);
 			if (phase == null) {
 				phase = new Phase(phaseName);
+				// phase.setLevelNumber(fromOther(activity.get);
 				activity.getPhases().add(phase);
 			}
 
