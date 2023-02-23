@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.gti.util.PositionManager;
 import com.gti.wbs.Activity;
 import com.gti.wbs.Output;
 import com.gti.wbs.Phase;
@@ -34,45 +35,44 @@ public class ActivityLoader {
 		Row titleRow = sheet.getRow(xlsxConfig.getTitleRowIndex());
 		ColumnMapper mapper = new ColumnMapper(titleRow);
 
+		PositionManager positioner = new PositionManager(0);
 		List<Activity> activities = new ArrayList<>();
 
 		for (int i = titleRow.getRowNum() + 1; i <= sheet.getLastRowNum(); i++) {
 			Row row = sheet.getRow(i);
 
-			// names
 			String activityName = getCellValue(row.getCell(mapper.getColumnIndex("aktivita"))).asString();
 			String phaseName = getCellValue(row.getCell(mapper.getColumnIndex("faza"))).asString();
 			String subactivityName = getCellValue(row.getCell(mapper.getColumnIndex("podaktivita"))).asString();
 			String taskName = getCellValue(row.getCell(mapper.getColumnIndex("uloha"))).asString();
-
-			// values
 			String outputName = getCellValue(row.getCell(mapper.getColumnIndex("vystup"))).asString();
+
 			String status = getCellValue(row.getCell(mapper.getColumnIndex("stav"))).asString();
 			String solver = getCellValue(row.getCell(mapper.getColumnIndex("riesitel"))).asString();
 			int priority = getCellValue(row.getCell(mapper.getColumnIndex("priorita"))).asInt();
 			int finishedInPercent = getCellValue(row.getCell(mapper.getColumnIndex("% dokoncenia"))).asInt(d -> d * 100);
 
-			// strange feeling that this will explode
 			LocalDate from = parseLocalDateOrElseNull("od aktualny", row, mapper);
 			LocalDate to = parseLocalDateOrElseNull("do aktualny", row, mapper);
 
 			Activity activity = lookupActivity(activities, activityName);
 			if (activity == null) {
 				activity = new Activity(activityName);
-				//activity.setLevelNumber();
+				activity.setPositionNumber(positioner.incrementAndGetActivityPosition());
 				activities.add(activity);
 			}
 
 			Phase phase = lookupPhase(activity, phaseName);
 			if (phase == null) {
 				phase = new Phase(phaseName);
-				// phase.setLevelNumber(fromOther(activity.get);
+				phase.setPositionNumber(positioner.incrementAndGetPhasePosition());
 				activity.getPhases().add(phase);
 			}
 
 			Subactivity subactivity = lookupSubactivity(phase, subactivityName);
 			if (subactivity == null) {
 				subactivity = new Subactivity(subactivityName);
+				subactivity.setPositionNumber(positioner.incrementAndGetSubactivityPosition());
 				phase.getSubactivities().add(subactivity);
 			}
 
@@ -84,12 +84,12 @@ public class ActivityLoader {
 			task.setFrom(from);
 			task.setTo(to);
 			task.setOutput(new Output(outputName));
+			task.setPositionNumber(positioner.incrementAndGetTaskPosition());
 			subactivity.getTasks().add(task);
 		}
+
 		workbook.close();
 
-		// could this be my responsibility? fuck no...
-//		activities.sort(Comparator.comparing(Activity::getName));
 		return activities;
 	}
 

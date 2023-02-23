@@ -4,15 +4,23 @@ import java.util.Objects;
 
 public abstract class WbsObject {
 
-	protected String levelNumber;
+	protected String position;
 	protected String description;
 
-	public WbsObject(String name) {
-		this.description = name;
+	public WbsObject(String description) {
+		this.description = description;
 	}
 
 	public String getDescription() {
 		return this.description;
+	}
+
+	public void setPositionNumber(String positionNumber) {
+		this.position = positionNumber;
+	}
+
+	public String getPositionNumber() {
+		return this.position;
 	}
 
 	@Override

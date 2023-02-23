@@ -53,7 +53,7 @@ public class Wbs {
 		SourceStringReader reader = new SourceStringReader(getConfigurationString());
 		String result;
 		try {
-			result = reader.outputImage(new FileOutputStream(outputFile), new FileFormatOption(FileFormat.SVG)).getDescription();
+			result = reader.outputImage(new FileOutputStream(outputFile), new FileFormatOption(fileFormat)).getDescription();
 		} catch (IOException ioex) {
 			result = "ERROR: " + ioex.getMessage();
 		}
@@ -141,7 +141,6 @@ public class Wbs {
 			  	  .append(System.lineSeparator());
 		}
 
-		// TODO: skips all null/empty properties -> collections are already dealt with during the fill out
 		private void appendData() {
 			for (Activity activity : config.data) {
 				config.configuration.append("**");
@@ -161,9 +160,11 @@ public class Wbs {
 			}
 		}
 
-		private void appendName(WbsObject namedObject) {
+		private void appendName(WbsObject wbsObject) {
 			config.configuration.append(boxingTag)
-				.append(namedObject.getDescription())
+				.append(wbsObject.getPositionNumber())
+				.append(" ")
+				.append(wbsObject.getDescription())
 				.append(System.lineSeparator());
 		}
 
@@ -184,6 +185,8 @@ public class Wbs {
 
 			config.configuration.append(config.colorless ? "" : task.getStatus().getColorCode())
 				.append(boxingTag)
+				.append(task.getPositionNumber())
+				.append(" ")
 				.append(name);
 
 			// if null -> do not appear them ..dates can also be N/A but it translates to null
