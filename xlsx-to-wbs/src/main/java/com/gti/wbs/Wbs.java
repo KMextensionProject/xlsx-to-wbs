@@ -1,6 +1,7 @@
 package com.gti.wbs;
 
 import static com.gti.enums.DateFormat.SLOVAK_DATE_FORMAT;
+import static java.lang.System.lineSeparator;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,24 +18,23 @@ import net.sourceforge.plantuml.SourceStringReader;
 public class Wbs {
 
 	private boolean boxed;
-	private boolean colorless;
+	private boolean statusColoring;
 	private String topLevelNodeName;
 	private List<Activity> data;
-	private StringBuilder configuration;
-	private int maxLineWidth;
+	private NodeStyle nodeStyle;
+	private String configuration;
 
 	private Wbs() {
-		this.colorless = true;
+		this.statusColoring = true;
 		this.boxed = true;
-		this.configuration = new StringBuilder();
 	}
 
 	public boolean isBoxed() {
 		return this.boxed;
 	}
 
-	public boolean isColorless() {
-		return this.colorless;
+	public boolean hasStatusColoring() {
+		return this.statusColoring;
 	}
 
 	public String getTopLevelNodeName() {
@@ -42,11 +42,11 @@ public class Wbs {
 	}
 
 	public String getConfigurationString() {
-		return this.configuration.toString();
+		return this.configuration;
 	}
 
-	public int getMaxLineWidth() {
-		return this.maxLineWidth;
+	public NodeStyle getNodeStyle() {
+		return this.nodeStyle;
 	}
 
 	public String save(String outputFile, FileFormat fileFormat) {
@@ -66,6 +66,7 @@ public class Wbs {
 		private static final String WBS_END_TAG = "@endwbs";
 		private String boxingTag = " ";
 
+		private StringBuilder configuration = new StringBuilder();
 		private final Wbs config = new Wbs();
 
 		public WbsBuilder makeBoxed(boolean boxed) {
@@ -73,21 +74,21 @@ public class Wbs {
 			return this;
 		}
 
-		public WbsBuilder makeColorless(boolean colorless) {
-			config.colorless = colorless;
-			return this;
-		}
-
 		/**
-		 * Defines max line width in pixels.
+		 * Coloring based on the mapping in the TaskStatus enum.
 		 */
-		public WbsBuilder withMaxLineWidth(int width) {
-			config.maxLineWidth = width;
+		public WbsBuilder withStatusBasedTaskColoring(boolean coloring) {
+			config.statusColoring = coloring;
 			return this;
 		}
 
 		public WbsBuilder withTopLevelNodeName(String topLevelNodeName) {
 			config.topLevelNodeName = topLevelNodeName;
+			return this;
+		}
+
+		public WbsBuilder withNodeStyle(NodeStyle nodeStyle) {
+			config.nodeStyle = nodeStyle;
 			return this;
 		}
 
@@ -99,60 +100,47 @@ public class Wbs {
 
 			// extract to separate method
 			boxingTag = config.boxed ? " " : "_ ";
-			config.configuration.append(WBS_START_TAG);
+			configuration.append(WBS_START_TAG);
 			appendStyleDefinition();
 			appendTopLevelNode();
 			appendData();
-			config.configuration.append(WBS_END_TAG);
+			configuration.append(WBS_END_TAG);
 
+			config.configuration = configuration.toString();
 			return config;
 		}
 
-		// TODO: separate to different class / style object
 		private void appendStyleDefinition() {
-			if (config.maxLineWidth > 0) {
-				config.configuration.append(System.lineSeparator());
-				StringBuilder styleDef = new StringBuilder("<style>")
-					.append(System.lineSeparator())
-					.append("node {")
-					.append(System.lineSeparator())
-					.append("HorizontalAlignment center")
-					.append(System.lineSeparator())
-					.append("MaximumWidth ")
-					.append(config.maxLineWidth)
-					.append(System.lineSeparator())
-					.append("}")
-					.append(System.lineSeparator())
-					.append("</style>");
-
-				config.configuration.append(styleDef);
+			if (config.nodeStyle != null) {
+				configuration.append(lineSeparator())
+					.append(config.nodeStyle.getStyleDefinition());
 			}
 		}
 
 		private void appendTopLevelNode() {
-			config.configuration
-				  .append(System.lineSeparator())
+			configuration
+				  .append(lineSeparator())
 				  .append("*")
 				  .append(boxingTag);
 			if (config.topLevelNodeName == null) {
 				config.topLevelNodeName = "PROJEKT";
 			}
-			config.configuration.append(config.topLevelNodeName)
-			  	  .append(System.lineSeparator());
+			configuration.append(config.topLevelNodeName)
+			  	  .append(lineSeparator());
 		}
 
 		private void appendData() {
 			for (Activity activity : config.data) {
-				config.configuration.append("**");
+				configuration.append("**");
 				appendName(activity);
 				for (Phase phase : activity.getPhases()) {
-					config.configuration.append("***");
+					configuration.append("***");
 					appendName(phase);
 					for (Subactivity subactivity : phase.getSubactivities()) {
-						config.configuration.append("****");
+						configuration.append("****");
 						appendName(subactivity);
 						for (Task task : subactivity.getTasks()) {
-							config.configuration.append("*****");
+							configuration.append("*****");
 							appendTask(task);
 						}
 					}
@@ -161,11 +149,11 @@ public class Wbs {
 		}
 
 		private void appendName(WbsObject wbsObject) {
-			config.configuration.append(boxingTag)
+			configuration.append(boxingTag)
 				.append(wbsObject.getPositionNumber())
 				.append(" ")
 				.append(wbsObject.getDescription())
-				.append(System.lineSeparator());
+				.append(lineSeparator());
 		}
 
 		private void appendTask(Task task) {
@@ -183,7 +171,7 @@ public class Wbs {
 			// if solver is N/A -> it isn't there ...make that disappear somehow
 			// wait for mbartko what he will say about the undefined fields
 
-			config.configuration.append(config.colorless ? "" : task.getStatus().getColorCode())
+			configuration.append(config.statusColoring ? task.getStatus().getColorCode() : "")
 				.append(boxingTag)
 				.append(task.getPositionNumber())
 				.append(" ")
@@ -191,27 +179,29 @@ public class Wbs {
 
 			// if null -> do not appear them ..dates can also be N/A but it translates to null
 			if (solver != null) {
-				config.configuration.append("\\nRiesitel: ").append(solver);
+				configuration.append("\\nRiešiteľ: ").append(solver);
 			}
 			if (status != null) {
-				config.configuration.append("\\nStav: ")
-					.append(status)
-					.append(" (")
-					.append(percentage)
-					.append("%)");
+				configuration.append("\\nStav: ")
+					.append(status);
+					if (percentage >= 0) {
+						configuration.append(" (")
+							.append(percentage)
+							.append("%)");
+					}
 			}
 			// should it be displayed even if it is excluded?
 			if (priority >= TaskPriority.EXCLUDED) {
-				config.configuration.append("\\nPriorita: ").append(priority);
+				configuration.append("\\nPriorita: ").append(priority);
 			}
 			if (from != null) {
-				config.configuration.append("\\nOd: ").append(from);
+				configuration.append("\\nOd: ").append(from);
 			}
 			if (to != null) {
-				config.configuration.append("\\nDo: ").append(to);
+				configuration.append("\\nDo: ").append(to);
 			}
 
-			config.configuration.append(System.lineSeparator());
+			configuration.append(lineSeparator());
 		}
 	}
 }

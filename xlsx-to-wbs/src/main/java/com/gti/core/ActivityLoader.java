@@ -23,6 +23,7 @@ import com.gti.xlsx.ColumnMapper;
 import com.gti.xlsx.XlsxMetadata;
 import com.gti.xlsx.XlsxUtils.CellValue;
 
+// to generalize the whole tool...I should use maps instead of pojos since, the hierarchy level can vary
 public class ActivityLoader {
 
 	public static List<Activity> loadFromXlsx(String xlsx) throws IOException {
@@ -98,7 +99,6 @@ public class ActivityLoader {
 		return cellValue.isNull() || cellValue.isUndefined() ? null : cellValue.asLocalDate();
 	}
 
-	// TODO: find a better way to do this with lists -> overriding equals won't help in this case.. God knows why
 	private static Activity lookupActivity(List<Activity> activities, String activityName) {
 		for (Activity activity : activities) {
 			if (activity.getDescription().equals(activityName)) {

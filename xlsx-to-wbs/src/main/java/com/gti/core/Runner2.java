@@ -5,29 +5,37 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.gti.wbs.Activity;
+import com.gti.wbs.NodeStyle;
 import com.gti.wbs.Wbs;
 import com.gti.xlsx.XlsxMetadata;
 
 import net.sourceforge.plantuml.FileFormat;
 
 public class Runner2 {
-// TODO: when pulling something out from the hierarchy... we need not to save such values that are not present in excel -> check the mapper
-// TODO: implement style options + hide configuration construction? -> let user know of sheet where to define column mapping
+
 	public static void main(String[] args) throws IOException {
+
 		XlsxMetadata xlsxConfig = new XlsxMetadata();
 		xlsxConfig.setTitleRowIndex(6);
 
 		List<Activity> activities = ActivityLoader.loadFromXlsx("sample.xlsx", xlsxConfig);
 		activities.sort(Comparator.comparing(Activity::getDescription));
 
+		NodeStyle style = new NodeStyle.StyleBuilder()
+			.withHorizontalAlignment("center")
+			.withMaximumLineWidth(400)
+			.withBackgroundColor("lightYellow")
+			.withLineColor("crimson")
+			.createStyle();
+
 		Wbs wbs = new Wbs.WbsBuilder()
-			.makeColorless(false)
-			.withMaxLineWidth(400)
+			.withNodeStyle(style)
 			.withTopLevelNodeName("MUSP")
+			.withStatusBasedTaskColoring(true)
 			.buildWbs(activities);
 
-//		System.out.println(wbs.getConfigurationString());
-		System.out.println(wbs.save("samplee.svg", FileFormat.SVG));
+		System.out.println(wbs.getConfigurationString());
+		System.out.println(wbs.save("sample.svg", FileFormat.SVG));
 
 	}
 
