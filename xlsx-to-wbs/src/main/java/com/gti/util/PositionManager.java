@@ -86,7 +86,7 @@ public class PositionManager {
 
 		public PositionHolder(int startingPositionNumber) {
 			this.position = startingPositionNumber;
-			this.resetPosition = 0;
+			this.resetPosition = position;
 		}
 
 		public void increment() {
