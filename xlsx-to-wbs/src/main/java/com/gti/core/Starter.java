@@ -11,18 +11,16 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 
 public class Starter {
 
@@ -38,7 +36,7 @@ public class Starter {
 		panel.add(xlsxLocationField);
 
 		FileDialog fileChooser = createFileDialog(frame, "Výber xlsx", FileDialog.LOAD);
-		JButton searchButton = createButton("Hľadať", a -> setTextFieldByFileChooser(xlsxLocationField, fileChooser));
+		JButton searchButton = createButton("Hľadať", a -> setTextFieldByFileChooser(xlsxLocationField, fileChooser, frame));
 		panel.add(searchButton);
 
 		JLabel titleRowLabel = new JLabel("Číslo titulného riadku v xlsx:");
@@ -61,7 +59,6 @@ public class Starter {
 		panel.add(stateColorChecker);
 		panel.add(boxedChecker);
 
-		// add menu bar?
 		frame.add(panel);
 		frame.setVisible(true);
 	}
@@ -76,9 +73,7 @@ public class Starter {
 
 	private static JPanel createPanel(int width, int height) {
 		JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT)); // add layout later
-//		JPanel panel = new JPanel(null);
 		panel.setSize(width, height);
-//		panel.setBackground(Color.LIGHT_GRAY);
 		return panel;
 	}
 
@@ -137,24 +132,21 @@ public class Starter {
 		return textField;
 	}
 
-	private static JTextField createTextField(JTextField otherTextField) {
-		throw new NotImplementedException("text field creation out of other text field is not implemented yet");
-	}
-
 	private static FileDialog createFileDialog(Frame parent, String title, int dialogType) {
 		FileDialog fileDialog = new FileDialog(parent, title, dialogType);
 		fileDialog.setMultipleMode(false);
-//		fileDialog.setLocationRelativeTo(frame);
-//		fileDialog.setFilenameFilter((dir, name) -> name.endsWith(".xlsx"));
 		return fileDialog;
 	}
 
-	private static void setTextFieldByFileChooser(JTextField textField, FileDialog fileChooser) {
+	private static void setTextFieldByFileChooser(JTextField textField, FileDialog fileChooser, JFrame parentForErrorDialog) {
 		fileChooser.setVisible(true);
 		File[] files = fileChooser.getFiles();
 		if (files.length != 0) {
-			// validate file type
-			textField.setText(files[0].getAbsolutePath());
+			if (files[0].getAbsolutePath().endsWith("xlsx")) {
+				textField.setText(files[0].getAbsolutePath());
+			} else {
+				JOptionPane.showMessageDialog(parentForErrorDialog, "Súbor musí byť typu xlsx", "Chyba", JOptionPane.ERROR_MESSAGE);
+			}
 		}
 	}
 
