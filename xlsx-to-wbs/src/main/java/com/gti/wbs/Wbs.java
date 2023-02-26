@@ -25,7 +25,6 @@ public class Wbs {
 	private String configuration;
 
 	private Wbs() {
-		this.statusColoring = true;
 		this.boxed = true;
 	}
 
