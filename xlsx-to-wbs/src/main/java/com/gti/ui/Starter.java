@@ -9,9 +9,12 @@ import static com.gti.ui.CustomComponentCreator.createNumericTextField;
 import static com.gti.ui.CustomComponentCreator.createPanel;
 import static com.gti.ui.CustomComponentCreator.createTextField;
 
+import java.awt.Desktop;
+import java.awt.Desktop.Action;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -19,6 +22,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -75,8 +81,9 @@ public class Starter {
 	}
 
 	private void createUI() {
-		frame = createFrame(475, 340);
-		panel = createPanel(475, 340);
+		frame = createFrame(475, 360);
+		panel = createPanel(475, 360);
+		addFrameMenuBar();
 
 		xlsxLocationField = createTextField(380, 25);
 		panel.add(xlsxLocationField);
@@ -136,6 +143,36 @@ public class Starter {
 
 		frame.add(panel);
 		frame.setVisible(true);
+	}
+
+	private void addFrameMenuBar() {
+		JMenuBar menuBar = new JMenuBar();
+		JMenu menu = new JMenu("Možnosti");
+		JMenuItem show = new JMenuItem("Zobraziť manuál");
+		JMenuItem save = new JMenuItem("Uložiť manuál");
+		show.addActionListener(e -> displayManual());
+		menu.add(show);
+		save.addActionListener(e -> System.out.println("save"));
+		menu.add(save);
+		menuBar.add(menu);
+		frame.setJMenuBar(menuBar);
+	}
+
+	// TODO: refactor
+	private void displayManual() {
+		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.OPEN)) {
+			try {
+				Desktop.getDesktop().open(new File("/home/UX/mkrajcovicux/Desktop/local_workspace/xlsx-to-wbs/xlsx-to-wbs/final_look.jpg"));
+			} catch (IOException ioe) {
+				JOptionPane.showMessageDialog(frame, "Nie je možné zobraziť manuál, použi možnosť uloženia.", "Chyba", JOptionPane.ERROR_MESSAGE);
+			}
+		} else {
+			JOptionPane.showMessageDialog(frame, "Nie je možné zobraziť manuál, použi možnosť uloženia.", "Chyba", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private void saveManual() {
+		// open dialog for save and use pdf
 	}
 
 	private void setTextFieldByFileDialogResult(JTextField textField, FileDialog fileDialog) {
