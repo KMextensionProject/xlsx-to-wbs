@@ -1,8 +1,9 @@
-package com.gti.core;
+package com.gti.xlsx;
 
 import static com.gti.enums.TaskStatus.getStatusByValue;
 import static com.gti.xlsx.XlsxUtils.getCellValue;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,19 +20,13 @@ import com.gti.wbs.Output;
 import com.gti.wbs.Phase;
 import com.gti.wbs.Subactivity;
 import com.gti.wbs.Task;
-import com.gti.xlsx.ColumnMapper;
-import com.gti.xlsx.XlsxMetadata;
 import com.gti.xlsx.XlsxUtils.CellValue;
 
 // to generalize the whole tool...I should use maps instead of pojos since, the hierarchy level can vary
 public class ActivityLoader {
 
-	public static List<Activity> loadFromXlsx(String xlsx) throws IOException {
-		return loadFromXlsx(xlsx, new XlsxMetadata());
-	}
-
-	public static List<Activity> loadFromXlsx(String xlsx, XlsxMetadata xlsxConfig) throws IOException {
-		Workbook workbook = new XSSFWorkbook(ActivityLoader.class.getClassLoader().getResourceAsStream(xlsx));
+	public List<Activity> loadFromXlsx(XlsxMetadata xlsxConfig) throws IOException {
+		Workbook workbook = new XSSFWorkbook(new FileInputStream(xlsxConfig.getFile()));
 		Sheet sheet = workbook.getSheetAt(xlsxConfig.getDataSheetIndex());
 		Row titleRow = sheet.getRow(xlsxConfig.getTitleRowIndex());
 		ColumnMapper mapper = new ColumnMapper(titleRow);
@@ -94,12 +89,12 @@ public class ActivityLoader {
 		return activities;
 	}
 
-	private static LocalDate parseLocalDateOrElseNull(String fieldName, Row row, ColumnMapper mapper) {
+	private LocalDate parseLocalDateOrElseNull(String fieldName, Row row, ColumnMapper mapper) {
 		CellValue cellValue = getCellValue(row.getCell(mapper.getColumnIndex(fieldName)));
 		return cellValue.isNull() || cellValue.isUndefined() ? null : cellValue.asLocalDate();
 	}
 
-	private static Activity lookupActivity(List<Activity> activities, String activityName) {
+	private Activity lookupActivity(List<Activity> activities, String activityName) {
 		for (Activity activity : activities) {
 			if (activity.getDescription().equals(activityName)) {
 				return activity;
@@ -108,7 +103,7 @@ public class ActivityLoader {
 		return null;
 	}
 
-	public static Phase lookupPhase(Activity activity, String phaseName) {
+	private Phase lookupPhase(Activity activity, String phaseName) {
 		for (Phase phase : activity.getPhases()) {
 			if (phase.getDescription().equals(phaseName)) {
 				return phase;
@@ -117,7 +112,7 @@ public class ActivityLoader {
 		return null;
 	}
 
-	public static Subactivity lookupSubactivity(Phase phase, String subactivityName) {
+	private Subactivity lookupSubactivity(Phase phase, String subactivityName) {
 		for (Subactivity subactivity : phase.getSubactivities()) {
 			if (subactivity.getDescription().equals(subactivityName)) {
 				return subactivity;

@@ -1,0 +1,256 @@
+package com.gti.ui;
+
+import static com.gti.ui.CustomComponentCreator.createBasicComboBox;
+import static com.gti.ui.CustomComponentCreator.createButton;
+import static com.gti.ui.CustomComponentCreator.createCheckBox;
+import static com.gti.ui.CustomComponentCreator.createFileDialog;
+import static com.gti.ui.CustomComponentCreator.createFrame;
+import static com.gti.ui.CustomComponentCreator.createNumericTextField;
+import static com.gti.ui.CustomComponentCreator.createPanel;
+import static com.gti.ui.CustomComponentCreator.createTextField;
+
+import java.awt.Dimension;
+import java.awt.FileDialog;
+import java.io.File;
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+
+import com.gti.util.FileUtils;
+import com.gti.wbs.Activity;
+import com.gti.wbs.NodeStyle;
+import com.gti.wbs.NodeStyle.StyleBuilder;
+import com.gti.wbs.Wbs;
+import com.gti.xlsx.ActivityLoader;
+import com.gti.xlsx.XlsxMetadata;
+
+import net.sourceforge.plantuml.FileFormat;
+
+// TODO: generalize throwing exceptions
+
+public class Starter {
+
+	private JFrame frame;
+	private JPanel panel;
+	private JTextField xlsxLocationField;
+	private JTextField xlsxDataSheetPosition;
+	private JTextField xlsxTitleRowPosition;
+	private JTextField topElementNameField;
+	private JTextField nodeTextPixelWidthField;
+	private JLabel dataSheetPositionLabel;
+	private JLabel titleRowLabel;
+	private JLabel topElementNameLabel;
+	private JLabel nodeThemeLabel;
+	private JLabel nodeTextPixelWidthLabel;
+	private JLabel outputFileTypeLabel;
+	private JLabel emptyLabel;
+	private JCheckBox stateColorChecker;
+	private JCheckBox boxedChecker;
+	private JComboBox<FileFormat> outputFileTypeCombo;
+	private JComboBox<String> nodeThemeCombo;
+	private FileDialog fileDialog;
+	private FileDialog saveDialog;
+	private JButton searchButton;
+	private JButton startButton;
+	private JSeparator wbsSectionSeparator;
+	private ActivityLoader activityLoader;
+
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(Starter::new);
+	}
+
+	public Starter() {
+		activityLoader = new ActivityLoader();
+		createUI();
+	}
+
+	private void createUI() {
+		frame = createFrame(475, 340);
+		panel = createPanel(475, 340);
+
+		xlsxLocationField = createTextField(380, 25);
+		panel.add(xlsxLocationField);
+
+		fileDialog = createFileDialog(frame, "Výber xlsx", FileDialog.LOAD);
+		searchButton = createButton("Hľadať", a -> setTextFieldByFileDialogResult(xlsxLocationField, fileDialog));
+		panel.add(searchButton);
+
+		dataSheetPositionLabel = new JLabel("Číslo zošitu v xlsx:");
+		xlsxDataSheetPosition = createNumericTextField(60, 25, "1 (prvý zošit)", 1);
+		panel.add(dataSheetPositionLabel);
+		panel.add(xlsxDataSheetPosition);
+
+		titleRowLabel = new JLabel("Číslo titulného riadku v xlsx:");
+		xlsxTitleRowPosition = createNumericTextField(60, 25, "1 (prvý riadok)", 1);		
+		panel.add(titleRowLabel);
+		panel.add(xlsxTitleRowPosition);
+
+		wbsSectionSeparator = new JSeparator(SwingConstants.HORIZONTAL);
+		wbsSectionSeparator.setAlignmentX(SwingConstants.CENTER);
+		wbsSectionSeparator.setPreferredSize(new Dimension(465, 4));
+		panel.add(wbsSectionSeparator);
+
+		topElementNameLabel = new JLabel("Názov hlavného (vrchného) prvku WBS:");
+		topElementNameField = createTextField(180, 25, "Zvyčajne sa udáva názov projektu");
+		panel.add(topElementNameLabel);
+		panel.add(topElementNameField);
+		
+		nodeTextPixelWidthLabel = new JLabel("Šírka WBS prvku: ");
+		nodeTextPixelWidthField = createNumericTextField(60, 25, "Udáva sa v pixeloch. (prázdne = bez limitu/zalomenia textu)", 400);
+		panel.add(nodeTextPixelWidthLabel);
+		panel.add(nodeTextPixelWidthField);
+
+		stateColorChecker = createCheckBox("Zafarbenie úlohy vo WBS podľa stavu dokončenia", true);
+		boxedChecker = createCheckBox("Zobraziť textové prvky WBS bez orámovania");
+		panel.add(stateColorChecker);
+		panel.add(boxedChecker);
+
+		outputFileTypeLabel = new JLabel("Formát výstupného súboru pre WBS:");
+		outputFileTypeCombo = createBasicComboBox("outFT", 100, 20, FileFormat.SVG, FileFormat.EPS);
+		panel.add(outputFileTypeLabel);
+		panel.add(outputFileTypeCombo);
+
+		nodeThemeLabel = new JLabel("Dizajn WBS prvku:");
+		nodeThemeCombo = createBasicComboBox("NT", 232, 20, "Štandard, bez farby", "Žlté pozadie, červený rám");
+		panel.add(nodeThemeLabel);
+		panel.add(nodeThemeCombo);
+		
+		emptyLabel = new JLabel("");
+		emptyLabel.setPreferredSize(new Dimension(400, 20));
+		panel.add(emptyLabel);
+
+		saveDialog = createFileDialog(frame, "Uloženie WBS", FileDialog.SAVE);
+		startButton = createButton("Vytvoriť WBS", a -> generateAndSaveWbs());
+		startButton.setPreferredSize(new Dimension(465, 28));
+		panel.add(startButton);
+
+		frame.add(panel);
+		frame.setVisible(true);
+	}
+
+	private void setTextFieldByFileDialogResult(JTextField textField, FileDialog fileDialog) {
+		fileDialog.setVisible(true);
+		File[] files = fileDialog.getFiles();
+		if (files.length != 0) {
+			if (files[0].getAbsolutePath().endsWith("xlsx")) {
+				textField.setText(files[0].getAbsolutePath());
+			} else {
+				JOptionPane.showMessageDialog(frame, "Súbor musí byť typu xlsx", "Chyba", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	public void generateAndSaveWbs() {
+		if (missingMandatoryFields()) {
+			return;
+		} else if (wronglyChecked()) {
+			return;
+		}
+		String outFile = validateAndGetOutputFile();
+		if (outFile.isEmpty()) {
+			// user didn't select any output file, quietly get out
+			return;
+		}
+		try {
+			Wbs wbs = createWbs(activityLoader.loadFromXlsx(readXlsxMetadata()));
+			wbs.save(outFile, (FileFormat) outputFileTypeCombo.getSelectedItem());
+			JOptionPane.showMessageDialog(frame, "WBS vytvorené: " + outFile, "Generovanie dokončené", JOptionPane.INFORMATION_MESSAGE);
+		} catch (Exception ioex) {
+			JOptionPane.showMessageDialog(frame, ioex.getMessage(), "Chyba", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private XlsxMetadata readXlsxMetadata() {
+		XlsxMetadata xlsxMeta = new XlsxMetadata();
+		xlsxMeta.setDataSheetIndex(parsePositionOrElse(xlsxDataSheetPosition.getText(), 0));
+		xlsxMeta.setTitleRowIndex(parsePositionOrElse(xlsxTitleRowPosition.getText(), 0));
+		xlsxMeta.setFile(new File(xlsxLocationField.getText()));
+		return xlsxMeta;
+	}
+
+	private NodeStyle readNodeStyle() {
+		StyleBuilder style = new NodeStyle.StyleBuilder();
+		String width = nodeTextPixelWidthField.getText();
+		if (!width.isEmpty()) {
+			style.withMaximumLineWidth(Integer.parseInt(width));
+		}
+		int theme = nodeThemeCombo.getSelectedIndex();
+		if (theme == 1) {
+			style.withBackgroundColor("lightYellow").withLineColor("crimson");
+		}
+		return style.withHorizontalAlignment("center").createStyle();
+	}
+
+	private int parsePositionOrElse(String text, int orElse) {
+		if (!text.isEmpty()) {
+			try {
+				return Integer.parseInt(text) - 1; // user is never indexing from 0
+			} catch (NumberFormatException nfex) {
+				return orElse;
+			}
+		}
+		return orElse;
+	}
+
+	private boolean missingMandatoryFields() {
+		StringBuilder errorMessage = new StringBuilder();
+		if (xlsxLocationField.getText().isEmpty()) {
+			errorMessage.append("xlsx súbor");
+		}
+		if (topElementNameField.getText().isEmpty()) {
+			if (errorMessage.length() != 0) {
+				errorMessage.append(", ");
+			}
+			errorMessage.append("názov hlavného prvku");
+		}
+		if (errorMessage.length() != 0) {
+			errorMessage.insert(0, "Nie sú vyplnené povinné polia: [");
+			errorMessage.append("]");
+			JOptionPane.showMessageDialog(frame, errorMessage, "Chyba", JOptionPane.ERROR_MESSAGE);
+			return true;
+		}
+		return false;
+	}
+
+	private boolean wronglyChecked() {
+		if (stateColorChecker.isSelected() && boxedChecker.isSelected()) {
+			JOptionPane.showMessageDialog(frame, "Nie je možné označiť obe zaškrtávacie políčka", "Chyba", JOptionPane.ERROR_MESSAGE);
+			return true;
+		}
+		return false;
+	}
+
+	private Wbs createWbs(List<Activity> activities) {
+		return new Wbs.WbsBuilder()
+			.withStatusBasedTaskColoring(stateColorChecker.isSelected())
+			.makeBoxed(!boxedChecker.isSelected())
+			.withTopLevelNodeName(topElementNameField.getText())
+			.withNodeStyle(readNodeStyle())
+			.buildWbs(activities);
+	}
+
+	private String validateAndGetOutputFile() {
+		// open "save file" dialog
+		saveDialog.setVisible(true);
+		if (saveDialog.getFiles().length == 0) {
+			return "";
+		}
+		String outFileName = saveDialog.getFiles()[0].getAbsolutePath();
+		FileFormat fileFormat = (FileFormat) outputFileTypeCombo.getSelectedItem();
+		if (saveDialog.getFiles()[0].isDirectory()) {
+			return FileUtils.appendFileNameWithExtension(outFileName, "WBS", fileFormat);
+		} else {
+			return FileUtils.overrideFileExtensionIfDifferent(outFileName, fileFormat);
+		}
+	}
+}
