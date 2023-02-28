@@ -14,7 +14,9 @@ import java.awt.Desktop.Action;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -122,16 +124,16 @@ public class Starter {
 		panel.add(stateColorChecker);
 		panel.add(boxedChecker);
 
+		nodeThemeLabel = new JLabel("Dizajn WBS prvku:");
+		nodeThemeCombo = createBasicComboBox("NT", 232, 20, "Štandard, bez farby", "Žlté pozadie, červený rám");
+		panel.add(nodeThemeLabel);
+		panel.add(nodeThemeCombo);
+
 		outputFileTypeLabel = new JLabel("Formát výstupného súboru pre WBS:");
 		outputFileTypeCombo = createBasicComboBox("outFT", 100, 20, FileFormat.SVG, FileFormat.EPS);
 		panel.add(outputFileTypeLabel);
 		panel.add(outputFileTypeCombo);
 
-		nodeThemeLabel = new JLabel("Dizajn WBS prvku:");
-		nodeThemeCombo = createBasicComboBox("NT", 232, 20, "Štandard, bez farby", "Žlté pozadie, červený rám");
-		panel.add(nodeThemeLabel);
-		panel.add(nodeThemeCombo);
-		
 		emptyLabel = new JLabel("");
 		emptyLabel.setPreferredSize(new Dimension(400, 20));
 		panel.add(emptyLabel);
@@ -152,7 +154,7 @@ public class Starter {
 		JMenuItem save = new JMenuItem("Uložiť manuál");
 		show.addActionListener(e -> displayManual());
 		menu.add(show);
-		save.addActionListener(e -> System.out.println("save"));
+		save.addActionListener(e -> saveManual());
 		menu.add(save);
 		menuBar.add(menu);
 		frame.setJMenuBar(menuBar);
@@ -162,8 +164,8 @@ public class Starter {
 	private void displayManual() {
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.OPEN)) {
 			try {
-				Desktop.getDesktop().open(new File("/home/UX/mkrajcovicux/Desktop/local_workspace/xlsx-to-wbs/xlsx-to-wbs/final_look.jpg"));
-			} catch (IOException ioe) {
+				Desktop.getDesktop().open(new File(getClass().getResource("/Manual.pdf").toURI()));
+			} catch (Exception ioe) {
 				JOptionPane.showMessageDialog(frame, "Nie je možné zobraziť manuál, použi možnosť uloženia.", "Chyba", JOptionPane.ERROR_MESSAGE);
 			}
 		} else {
@@ -172,7 +174,14 @@ public class Starter {
 	}
 
 	private void saveManual() {
-		// open dialog for save and use pdf
+		String outputPath = validateAndGetOutputFile("Manual", FileFormat.PDF);
+		try {
+			Path target = Paths.get(outputPath);
+			Files.copy(getClass().getClassLoader().getResourceAsStream("Manual.pdf"), target);
+			JOptionPane.showMessageDialog(frame, "Manuál bol úspešne uložený.", "Uloženie", JOptionPane.INFORMATION_MESSAGE);
+		} catch (Exception ioex) {
+			JOptionPane.showMessageDialog(frame, "Nie je možné uložiť manuál, použi možnosť zobrazenia.", "Chyba", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	private void setTextFieldByFileDialogResult(JTextField textField, FileDialog fileDialog) {
@@ -193,7 +202,7 @@ public class Starter {
 		} else if (wronglyChecked()) {
 			return;
 		}
-		String outFile = validateAndGetOutputFile();
+		String outFile = validateAndGetOutputFile("WBS", (FileFormat) outputFileTypeCombo.getSelectedItem());
 		if (outFile.isEmpty()) {
 			// user didn't select any output file, quietly get out
 			return;
@@ -276,18 +285,17 @@ public class Starter {
 			.buildWbs(activities);
 	}
 
-	private String validateAndGetOutputFile() {
+	private String validateAndGetOutputFile(String defaultName, FileFormat extension) {
 		// open "save file" dialog
 		saveDialog.setVisible(true);
 		if (saveDialog.getFiles().length == 0) {
 			return "";
 		}
 		String outFileName = saveDialog.getFiles()[0].getAbsolutePath();
-		FileFormat fileFormat = (FileFormat) outputFileTypeCombo.getSelectedItem();
 		if (saveDialog.getFiles()[0].isDirectory()) {
-			return FileUtils.appendFileNameWithExtension(outFileName, "WBS", fileFormat);
+			return FileUtils.appendFileNameWithExtension(outFileName, defaultName, extension);
 		} else {
-			return FileUtils.overrideFileExtensionIfDifferent(outFileName, fileFormat);
+			return FileUtils.overrideFileExtensionIfDifferent(outFileName, extension);
 		}
 	}
 }
