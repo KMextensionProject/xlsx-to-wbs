@@ -175,6 +175,9 @@ public class Starter {
 
 	private void saveManual() {
 		String outputPath = validateAndGetOutputFile("Manual", FileFormat.PDF);
+		if (outputPath.isEmpty()) {
+			return;
+		}
 		try {
 			Path target = Paths.get(outputPath);
 			Files.copy(getClass().getClassLoader().getResourceAsStream("Manual.pdf"), target);
