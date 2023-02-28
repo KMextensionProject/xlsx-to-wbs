@@ -25,7 +25,7 @@ public class XlsxUtils {
 		case Cell.CELL_TYPE_STRING:
 			cellValue = cell.getRichStringCellValue()
 				.getString()
-				.replace(System.lineSeparator(), "")
+				.replace("\n", "")
 				.trim();
 			break;
 		case Cell.CELL_TYPE_NUMERIC:

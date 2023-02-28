@@ -8,6 +8,7 @@ import static com.gti.ui.CustomComponentCreator.createFrame;
 import static com.gti.ui.CustomComponentCreator.createNumericTextField;
 import static com.gti.ui.CustomComponentCreator.createPanel;
 import static com.gti.ui.CustomComponentCreator.createTextField;
+import static com.gti.ui.CustomComponentCreator.createEmptyLabel;
 
 import java.awt.Desktop;
 import java.awt.Desktop.Action;
@@ -83,8 +84,8 @@ public class Starter {
 	}
 
 	private void createUI() {
-		frame = createFrame(475, 360);
-		panel = createPanel(475, 360);
+		frame = createFrame(485, 370);
+		panel = createPanel(485, 370);
 		addFrameMenuBar();
 
 		xlsxLocationField = createTextField(380, 25);
@@ -123,6 +124,7 @@ public class Starter {
 		boxedChecker = createCheckBox("Zobraziť textové prvky WBS bez orámovania");
 		panel.add(stateColorChecker);
 		panel.add(boxedChecker);
+		panel.add(createEmptyLabel(100)); // until normal layout is implemented..  TODO: get rid of these
 
 		nodeThemeLabel = new JLabel("Dizajn WBS prvku:");
 		nodeThemeCombo = createBasicComboBox("NT", 232, 20, "Štandard, bez farby", "Žlté pozadie, červený rám");
@@ -135,7 +137,7 @@ public class Starter {
 		panel.add(outputFileTypeCombo);
 
 		emptyLabel = new JLabel("");
-		emptyLabel.setPreferredSize(new Dimension(400, 20));
+		emptyLabel.setPreferredSize(new Dimension(450, 20));
 		panel.add(emptyLabel);
 
 		saveDialog = createFileDialog(frame, "Uloženie WBS", FileDialog.SAVE);
@@ -144,6 +146,7 @@ public class Starter {
 		panel.add(startButton);
 
 		frame.add(panel);
+		frame.setResizable(false);
 		frame.setVisible(true);
 	}
 

@@ -21,7 +21,7 @@ public class NoMappingFound extends RuntimeException {
 
 	@Override
 	public String getMessage() {
-		StringBuilder message = new StringBuilder("there is no mapping for column ");
+		StringBuilder message = new StringBuilder("Nie je možné namapovať stĺpec ");
 		if (!columnName.isEmpty()) {
 			message.append("name ")
 				   .append(columnName);
