@@ -167,7 +167,7 @@ public class Starter {
 	private void displayManual() {
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.OPEN)) {
 			try {
-				Desktop.getDesktop().open(new File(getClass().getResource("/Manual.pdf").toURI()));
+				Desktop.getDesktop().open(new File(getClass().getClassLoader().getResource("/Manual.pdf").toURI()));
 			} catch (Exception ioe) {
 				JOptionPane.showMessageDialog(frame, "Nie je možné zobraziť manuál, použi možnosť uloženia.", "Chyba", JOptionPane.ERROR_MESSAGE);
 			}

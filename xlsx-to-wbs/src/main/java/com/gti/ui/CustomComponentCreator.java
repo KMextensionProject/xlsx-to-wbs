@@ -15,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -113,6 +114,12 @@ public class CustomComponentCreator {
 		}
 		comboBox.setModel(new DefaultComboBoxModel<>(options));
 		return comboBox;
+	}
+
+	public static JLabel createEmptyLabel(int width) {
+		JLabel label = new JLabel("");
+		label.setPreferredSize(new Dimension(width, 20));
+		return label;
 	}
 
 }
