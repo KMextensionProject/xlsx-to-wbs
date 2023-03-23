@@ -23,8 +23,7 @@ public class NoMappingFound extends RuntimeException {
 	public String getMessage() {
 		StringBuilder message = new StringBuilder("Nie je možné namapovať stĺpec ");
 		if (!columnName.isEmpty()) {
-			message.append("name ")
-				   .append(columnName);
+			message.append(columnName);
 		} else if (columnIndex != Integer.MIN_VALUE) {
 			message.append("index ")
 				   .append(columnIndex);
