@@ -1,12 +1,17 @@
 package com.gti.xlsx;
 
 import java.io.File;
+import java.util.List;
 
 public class XlsxMetadata {
 
 	private File file;
 	private int dataSheetIndex;
 	private int titleRowIndex;
+	// these must not be empty and at least one must be present
+	List<String> hierarchyColumns; // A, B, C, E
+	// these may be empty, but they represent properties of the last column in the hierarchy
+	List<String> propertyColumns; // D, F, M, AB, AS
 
 	public XlsxMetadata() {
 		// zeroes are default

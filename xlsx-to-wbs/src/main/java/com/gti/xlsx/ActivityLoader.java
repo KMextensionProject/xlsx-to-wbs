@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -24,6 +25,15 @@ import com.gti.xlsx.XlsxUtils.CellValue;
 
 // to generalize the whole tool...I should use maps instead of pojos since, the hierarchy level can vary
 public class ActivityLoader {
+
+	// xlsx meta should contain column names sorted by hierarchy and the last element should have some indicator
+	// that below picuses have
+	private List<Map<String, Object>> customLoadFromXlsx(XlsxMetadata xlsxMetaData) {
+		
+		
+		
+		return null;
+	}
 
 	public List<Activity> loadFromXlsx(XlsxMetadata xlsxConfig) throws IOException {
 		Workbook workbook = new XSSFWorkbook(new FileInputStream(xlsxConfig.getFile()));
