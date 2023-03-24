@@ -3,15 +3,21 @@ package com.gti.xlsx;
 import static com.gti.util.StringUtils.stripDiacritics;
 import static com.gti.xlsx.XlsxUtils.getCellValue;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.Row;
 
+// create mapper for top hierarchy and then for childs
 public class ColumnMapper {
+
+	private static final List<String> COLUMN_CODE_MAP = Collections.unmodifiableList(initColumnCodes());
+//	private XlsxMetadata xlsxMeta;
 
 	// TODO: do i need this now?
 
@@ -23,9 +29,18 @@ public class ColumnMapper {
 	 * Creates a bidirectional mapping for column names and its index positions.
 	 * @param titleRow - row that contains column names
 	 */
+	public ColumnMapper(XlsxMetadata xlsxMeta, Row titleRow) {
+		this.nameIndexMap = new HashMap<>(30);
+		this.indexNameMap = new HashMap<>(30);
+//		this.xlsxMeta = xlsxMeta;
+		init(titleRow);
+	}
+	
+	// legacy constructor.. TOTO: delete this
 	public ColumnMapper(Row titleRow) {
 		this.nameIndexMap = new HashMap<>(30);
 		this.indexNameMap = new HashMap<>(30);
+//		this.xlsxMeta = xlsxMeta;
 		init(titleRow);
 	}
 
@@ -35,19 +50,19 @@ public class ColumnMapper {
 			String columnName = stripDiacritics(getCellValue(cell).asString().toLowerCase());
 			int columnIndex = cell.getColumnIndex();
 
-			// TODO: delete this, this is unwanted
-			// let's skip unwanted columns
-			Comment cellComment = cell.getCellComment();
-			if (cellComment != null) {
-				String comment = cellComment.getString().getString();
-				if (comment.startsWith("@nowbs")) {
-					continue;
-				}
-			}
-
 			nameIndexMap.put(columnName, columnIndex);
 			indexNameMap.put(columnIndex, columnName);
 		}
+	}
+
+	private static List<String> initColumnCodes() {
+		List<String> columnCodes = new ArrayList<>(26);
+		char start = 'A';
+		for (int i = 0; i < 26; i++) {
+			columnCodes.add(start + "");
+			start++;
+		}
+		return columnCodes;
 	}
 
 	public int getColumnIndex(String columnName) {
@@ -58,6 +73,22 @@ public class ColumnMapper {
 		return index.intValue();
 	}
 
+	public int getColumnIndexByCode(String columnCode) {
+		int index = COLUMN_CODE_MAP.indexOf(columnCode);
+		if (index == -1) {
+			throw new NoMappingFound(columnCode);
+		}
+		return index;
+	}
+
+	public int getColumnIndexByName(String columnName) {
+		Integer index = nameIndexMap.get(columnName);
+		if (index == null) {
+			throw new NoMappingFound(columnName);
+		}
+		return index.intValue();
+	}
+	
 	public int getColumnIndex(String columnName, int orElse) {
 		Integer index = nameIndexMap.get(columnName);
 		if (index != null) {
