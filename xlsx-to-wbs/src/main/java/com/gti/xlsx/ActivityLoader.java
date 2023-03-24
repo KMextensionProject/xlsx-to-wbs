@@ -48,8 +48,8 @@ public class ActivityLoader {
 			Row row = sheet.getRow(i);
 
 			String activityName = getCellValue(row.getCell(mapper.getColumnIndex("aktivita"))).asString();
-			String phaseName = getCellValue(row.getCell(mapper.getColumnIndex("faza"))).asString();
-			String subactivityName = getCellValue(row.getCell(mapper.getColumnIndex("podaktivita"))).asString();
+			String phaseName = getCellValue(row.getCell(mapper.getColumnIndex("podaktivita"))).asString();
+			String subactivityName = getCellValue(row.getCell(mapper.getColumnIndex("faza"))).asString();
 			String taskName = getCellValue(row.getCell(mapper.getColumnIndex("uloha"))).asString();
 			String outputName = getCellValue(row.getCell(mapper.getColumnIndex("vystup"))).asString();
 
