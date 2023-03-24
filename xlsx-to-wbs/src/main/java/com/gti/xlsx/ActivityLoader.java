@@ -32,75 +32,71 @@ public class ActivityLoader {
 	// 2:C -> third column in the second sheet
 	// D:% -> fourth column in the first sheet should be displayed as percentage
 	public static void main(String[] args) throws IOException {
-
-		/*
-		 * AlgoRytmus:
-		 * 
-		 * - nacitam metadata o excely :
-		 * 		[umiestnenie, 
-		 * 		 index titulneho riadku, 
-		 * 		 index sheetu, 
-		 * 		 hierarchiu parent stlpcov, 
-		 * 		 vlastnosti (stlpce) posledneho stlpca v hierarchii
-		 * 		]
-		 * 
-		 * - vytvorim mapper pre stlpce, ktory mi dovoli si pytat toto:
-		 * 		[index stlpca na zaklade titulneho nazvu,
-		 * 		 index stlpca na zaklade kodu stlpca,
-		 * 		 nazov stlpca na zaklade indexu stlpca,
-		 * 		 kod stlpca na zaklade indexu stlpca
-		 * 		]
-		 * 
-		 * - zacnem prechadzat kazdy jeden riadok v excely:
-		 * 		- pre parentov potrebujem len hodnoty, nazvy stlpcov ma nezaujimaju
-		 * 		- ak v parentovy natrafim na duplicitnu hodnotu, vznikne jeho child a tak dalej do poslednej vrstvy
-		 * 
-		 */
-
+		
 		XlsxMetadata xlsxMeta = new XlsxMetadata("/home/UX/mkrajcovicux/Desktop/local_workspace/xlsx-to-wbs/xlsx-to-wbs/src/main/resources/sample.xlsx");
 		xlsxMeta.setDataSheetIndex(0);
 		xlsxMeta.setTitleRowIndex(2);
-		xlsxMeta.setParentColumns(Arrays.asList("B", "C", "D")); // toto potrebujem lepsie parsovat
+		xlsxMeta.setParentColumns(Arrays.asList("B", "C", "D", "G")); // toto potrebujem lepsie parsovat
+		xlsxMeta.setPropertyColumns(Arrays.asList("H", "I")); // TODO: check if not null or empty !!
 
 		Workbook workbook = new XSSFWorkbook(new FileInputStream(xlsxMeta.getFile()));
 		Sheet sheet = workbook.getSheetAt(xlsxMeta.getDataSheetIndex());
 		Row titleRow = sheet.getRow(xlsxMeta.getTitleRowIndex());
 		ColumnMapper mapper = new ColumnMapper(titleRow);
 
-//		Map<String, Object> hierarchicalData = new LinkedHashMap<>(); // order is important here
-//		for (String columnCode : xlsxMeta.getParentColumns()) {
-//			int columnIndex = mapper.getColumnIndexByCode(columnCode);
-//			System.out.println("index: " + columnIndex + ", code: " + columnCode + ", name: " + mapper.getColumnName(columnIndex, "empty"));
-//		}
-
-		// sem si budem ukladat vsetky data
-		Map<String, Object> hierarchicalData = new LinkedHashMap<>(); // order is important here
-
-		// prechadzam kazdy jeden riadok v sheete
+		Map<String, Object> activities = new LinkedHashMap<>();
 		for (int i = titleRow.getRowNum() + 1; i <= sheet.getLastRowNum(); i++) {
 			Row row = sheet.getRow(i);
 
-			// mapa pre tento riadok
-			Map<String, Object> data = new LinkedHashMap<>();
+			List<String> parentColumns = xlsxMeta.getParentColumns();
+			Map<String, Object> parent = activities;
+			String value = null;
+			for (int j = 0; j < parentColumns.size(); j++) {
+				String columnCode = parentColumns.get(j);
+				// should the mapper's method be generic for name and code? ..it would be useful for user maybe
+				value = getCellValue(row.getCell(mapper.getColumnIndexByCode(columnCode))).asString(); // better value resolving.. for testing let it be string
 
-			// teraz prechadzam kazdy stlpec pre parentov
-			for (String columnCode : xlsxMeta.getParentColumns()) { // should the mapper's method be generic for name and code? ..it would be useful for user maybe
-
-				// ziskam si hodnotu bunky z hierarchickeho stlpca -> B, C, D
-				String value = getCellValue(row.getCell(mapper.getColumnIndexByCode(columnCode))).asString(); // zatial vsetko ako string
-
-				// ak moje data neobsahuju tohto parenta (stlpec B), vytvorim si pre neho miesto a pokracujem dalsim slpcom
-				if (!data.containsKey(value)) {
-					data.put(value, new LinkedHashMap<>());
-
-					// ak moje data uz obsahuju tohto parenta (stlpec B), vlozim novy udaj do najvacsej hlbky pod tymto klucom
-				} else {
-					data.get(value);
+				if (!parent.containsKey(value)) {
+					parent.put(value, new LinkedHashMap<>());
+				}
+				// I need the last reference later so, omit the value extraction in the last iteration
+				if (!(j == parentColumns.size() - 1)) {
+					parent = (Map<String, Object>) parent.get(value);
 				}
 			}
-		}
 
+			Map<String, Object> taskData = new LinkedHashMap<>();
+			for (String columnCode : xlsxMeta.getPropertyColumns()) {
+				int columnIndex = mapper.getColumnIndexByCode(columnCode);
+				String taskValue = getCellValue(row.getCell(columnIndex)).asString();
+				taskData.put(mapper.getColumnName(columnIndex), taskValue);
+			}
+
+			Object parentContent = parent.get(value);
+			if (parentContent instanceof Map) {
+				List<Map<String, Object>> taskList = new ArrayList<>();
+				taskList.add(taskData);
+				parent.put(value, taskList);
+			} else if (parentContent instanceof List) {
+				((List<Map<String, Object>>)parentContent).add(taskData);
+			}
+		}
+//		activities.forEach((k, v) -> System.out.println(k + " -> " + v));
+//		printMapRecursive(activities);
 		workbook.close();
+	}
+
+	private static void printMapRecursive(Map<String, Object> source) {
+		for (Map.Entry<String, Object> pica : source.entrySet()) {
+			Object val = pica.getValue();
+			if (val instanceof Map) {
+				System.out.println(pica.getKey());
+				printMapRecursive((Map) val);
+			} else {
+				System.out.print(val + " ");
+			}
+			System.out.println();
+		}
 	}
 
 	// xlsx meta should contain column names sorted by hierarchy and the last element should have some indicator

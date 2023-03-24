@@ -25,6 +25,7 @@ public class XlsxMetadata {
 	public XlsxMetadata() {
 		// zeroes are default
 		parentColumns = new ArrayList<>();
+		propertyColumns = new ArrayList<>();
 	}
 
 	public XlsxMetadata(File file) {
