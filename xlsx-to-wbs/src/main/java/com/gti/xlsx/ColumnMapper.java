@@ -17,7 +17,6 @@ import org.apache.poi.ss.usermodel.Row;
 public class ColumnMapper {
 
 	private static final List<String> COLUMN_CODE_MAP = Collections.unmodifiableList(initColumnCodes());
-//	private XlsxMetadata xlsxMeta;
 
 	// TODO: do i need this now?
 
@@ -29,18 +28,9 @@ public class ColumnMapper {
 	 * Creates a bidirectional mapping for column names and its index positions.
 	 * @param titleRow - row that contains column names
 	 */
-	public ColumnMapper(XlsxMetadata xlsxMeta, Row titleRow) {
-		this.nameIndexMap = new HashMap<>(30);
-		this.indexNameMap = new HashMap<>(30);
-//		this.xlsxMeta = xlsxMeta;
-		init(titleRow);
-	}
-	
-	// legacy constructor.. TOTO: delete this
 	public ColumnMapper(Row titleRow) {
 		this.nameIndexMap = new HashMap<>(30);
 		this.indexNameMap = new HashMap<>(30);
-//		this.xlsxMeta = xlsxMeta;
 		init(titleRow);
 	}
 
@@ -65,30 +55,23 @@ public class ColumnMapper {
 		return columnCodes;
 	}
 
-	public int getColumnIndex(String columnName) {
-		Integer index = nameIndexMap.get(columnName);
-		if (index == null) {
-			throw new NoMappingFound(columnName);
-		}
-		return index.intValue();
-	}
-
-	public int getColumnIndexByCode(String columnCode) {
-		int index = COLUMN_CODE_MAP.indexOf(columnCode);
+	public int getColumnIndex(String columnCodeOrName) {
+		int index = COLUMN_CODE_MAP.indexOf(columnCodeOrName);
 		if (index == -1) {
-			throw new NoMappingFound(columnCode);
+			return resolveColumnIndex(columnCodeOrName);
 		}
 		return index;
 	}
 
-	public int getColumnIndexByName(String columnName) {
+	private int resolveColumnIndex(String columnName) {
 		Integer index = nameIndexMap.get(columnName);
 		if (index == null) {
 			throw new NoMappingFound(columnName);
 		}
-		return index.intValue();
+		return index.intValue();	
 	}
-	
+
+	// TODO: by code?
 	public int getColumnIndex(String columnName, int orElse) {
 		Integer index = nameIndexMap.get(columnName);
 		if (index != null) {
@@ -105,6 +88,7 @@ public class ColumnMapper {
 		return columnName;
 	}
 
+	// TODO: getColumnName by code or columnIndex
 	public String getColumnName(int columnIndex, String orElse) {
 		String columnName = indexNameMap.get(columnIndex);
 		if (columnName != null) {

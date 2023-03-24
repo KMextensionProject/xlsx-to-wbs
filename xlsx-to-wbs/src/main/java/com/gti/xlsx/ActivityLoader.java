@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,14 +30,10 @@ public class ActivityLoader {
 	// A -> first column in first sheet
 	// 2:C -> third column in the second sheet
 	// D:% -> fourth column in the first sheet should be displayed as percentage
-	public static void main(String[] args) throws IOException {
-		
-		XlsxMetadata xlsxMeta = new XlsxMetadata("/home/UX/mkrajcovicux/Desktop/local_workspace/xlsx-to-wbs/xlsx-to-wbs/src/main/resources/sample.xlsx");
-		xlsxMeta.setDataSheetIndex(0);
-		xlsxMeta.setTitleRowIndex(2);
-		xlsxMeta.setParentColumns(Arrays.asList("B", "C", "D", "G")); // toto potrebujem lepsie parsovat
-		xlsxMeta.setPropertyColumns(Arrays.asList("H", "I")); // TODO: check if not null or empty !!
 
+	// TODO: split into smaller methods
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> loadFromXlsx (XlsxMetadata xlsxMeta) throws IOException {
 		Workbook workbook = new XSSFWorkbook(new FileInputStream(xlsxMeta.getFile()));
 		Sheet sheet = workbook.getSheetAt(xlsxMeta.getDataSheetIndex());
 		Row titleRow = sheet.getRow(xlsxMeta.getTitleRowIndex());
@@ -54,7 +49,7 @@ public class ActivityLoader {
 			for (int j = 0; j < parentColumns.size(); j++) {
 				String columnCode = parentColumns.get(j);
 				// should the mapper's method be generic for name and code? ..it would be useful for user maybe
-				value = getCellValue(row.getCell(mapper.getColumnIndexByCode(columnCode))).asString(); // better value resolving.. for testing let it be string
+				value = getCellValue(row.getCell(mapper.getColumnIndex(columnCode))).asString(); // better value resolving.. for testing let it be string
 
 				if (!parent.containsKey(value)) {
 					parent.put(value, new LinkedHashMap<>());
@@ -67,7 +62,7 @@ public class ActivityLoader {
 
 			Map<String, Object> taskData = new LinkedHashMap<>();
 			for (String columnCode : xlsxMeta.getPropertyColumns()) {
-				int columnIndex = mapper.getColumnIndexByCode(columnCode);
+				int columnIndex = mapper.getColumnIndex(columnCode);
 				String taskValue = getCellValue(row.getCell(columnIndex)).asString();
 				taskData.put(mapper.getColumnName(columnIndex), taskValue);
 			}
@@ -81,34 +76,11 @@ public class ActivityLoader {
 				((List<Map<String, Object>>)parentContent).add(taskData);
 			}
 		}
-//		activities.forEach((k, v) -> System.out.println(k + " -> " + v));
-//		printMapRecursive(activities);
 		workbook.close();
+		return activities;
 	}
 
-	private static void printMapRecursive(Map<String, Object> source) {
-		for (Map.Entry<String, Object> pica : source.entrySet()) {
-			Object val = pica.getValue();
-			if (val instanceof Map) {
-				System.out.println(pica.getKey());
-				printMapRecursive((Map) val);
-			} else {
-				System.out.print(val + " ");
-			}
-			System.out.println();
-		}
-	}
-
-	// xlsx meta should contain column names sorted by hierarchy and the last element should have some indicator
-	// that below picuses have
-	private List<Map<String, Object>> customLoadFromXlsx(XlsxMetadata xlsxMeta) {
-		List<String> parentCols = xlsxMeta.getParentColumns();
-		List<String> propertyCols = xlsxMeta.getPropertyColumns();
-
-		return null;
-	}
-
-	public List<Activity> loadFromXlsx(XlsxMetadata xlsxConfig) throws IOException {
+	public List<Activity> load(XlsxMetadata xlsxConfig) throws IOException {
 		Workbook workbook = new XSSFWorkbook(new FileInputStream(xlsxConfig.getFile()));
 		Sheet sheet = workbook.getSheetAt(xlsxConfig.getDataSheetIndex());
 		Row titleRow = sheet.getRow(xlsxConfig.getTitleRowIndex());

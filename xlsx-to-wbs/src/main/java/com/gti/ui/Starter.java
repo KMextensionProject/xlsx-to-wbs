@@ -214,7 +214,7 @@ public class Starter {
 			return;
 		}
 		try {
-			Wbs wbs = createWbs(activityLoader.loadFromXlsx(readXlsxMetadata()));
+			Wbs wbs = createWbs(activityLoader.load(readXlsxMetadata())); // TODO: delete legacy call on load()
 			wbs.save(outFile, (FileFormat) outputFileTypeCombo.getSelectedItem());
 			JOptionPane.showMessageDialog(frame, "WBS vytvorené: " + outFile, "Generovanie dokončené", JOptionPane.INFORMATION_MESSAGE);
 		} catch (Exception ioex) {
@@ -227,6 +227,7 @@ public class Starter {
 		xlsxMeta.setDataSheetIndex(parsePositionOrElse(xlsxDataSheetPosition.getText(), 0));
 		xlsxMeta.setTitleRowIndex(parsePositionOrElse(xlsxTitleRowPosition.getText(), 0));
 		xlsxMeta.setFile(new File(xlsxLocationField.getText()));
+		// TODO: validate before returning!!
 		return xlsxMeta;
 	}
 

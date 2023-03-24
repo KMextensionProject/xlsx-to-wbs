@@ -52,6 +52,8 @@ public class XlsxUtils {
 		private Object cellValue;
 		private boolean isUndefined;
 		private boolean isNull;
+		// isNumeric;
+		// isDate
 
 		public CellValue(Object value) {
 			if (value == null) {
