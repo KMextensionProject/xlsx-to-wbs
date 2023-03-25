@@ -1,20 +1,21 @@
 package com.gti.enums;
 
-import com.gti.util.StringUtils;
+import static com.gti.util.StringUtils.EMPTY_STRING;
 
 public enum TaskStatus {
 
 	COMPLETED("Dokončené", "[#lightgreen]"), 
 	ACCORDING_TO_PLAN("Podľa plánu", "[#SkyBlue]"), 
-	FUTURE_TASK("Budúca úloha", StringUtils.EMPTY_STRING), 
+	FUTURE_TASK("Budúca úloha"), 
 	DELAYED("Oneskorené", "[#orange]"), 
-	CANCELED("Zrušené", "[#salmon]");
+	CANCELED("Zrušené", "[#salmon]"),
+	UNDEFINED(EMPTY_STRING);
 
 	private String value;
 	private String colorCode;
 
 	private TaskStatus(String value) {
-		this(value, StringUtils.EMPTY_STRING);
+		this(value, EMPTY_STRING);
 	}
 
 	private TaskStatus(String value, String colorCode) {
@@ -40,8 +41,10 @@ public enum TaskStatus {
 			return TaskStatus.DELAYED;
 		case "Podľa plánu":
 			return TaskStatus.ACCORDING_TO_PLAN;
+		case "Budúca úloha":
+			return TaskStatus.FUTURE_TASK;
 		default:
-			return TaskStatus.FUTURE_TASK;	
+			return TaskStatus.UNDEFINED;
 		}
 	}
 }

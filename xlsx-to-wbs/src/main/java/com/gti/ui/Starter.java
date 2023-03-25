@@ -3,12 +3,12 @@ package com.gti.ui;
 import static com.gti.ui.CustomComponentCreator.createBasicComboBox;
 import static com.gti.ui.CustomComponentCreator.createButton;
 import static com.gti.ui.CustomComponentCreator.createCheckBox;
+import static com.gti.ui.CustomComponentCreator.createEmptyLabel;
 import static com.gti.ui.CustomComponentCreator.createFileDialog;
 import static com.gti.ui.CustomComponentCreator.createFrame;
 import static com.gti.ui.CustomComponentCreator.createNumericTextField;
 import static com.gti.ui.CustomComponentCreator.createPanel;
 import static com.gti.ui.CustomComponentCreator.createTextField;
-import static com.gti.ui.CustomComponentCreator.createEmptyLabel;
 
 import java.awt.Desktop;
 import java.awt.Desktop.Action;
@@ -18,7 +18,9 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -214,10 +216,11 @@ public class Starter {
 			return;
 		}
 		try {
-			Wbs wbs = createWbs(activityLoader.load(readXlsxMetadata())); // TODO: delete legacy call on load()
+			Wbs wbs = createWbs(activityLoader.loadFromXlsx(readXlsxMetadata())); 
 			wbs.save(outFile, (FileFormat) outputFileTypeCombo.getSelectedItem());
 			JOptionPane.showMessageDialog(frame, "WBS vytvorené: " + outFile, "Generovanie dokončené", JOptionPane.INFORMATION_MESSAGE);
 		} catch (Exception ioex) {
+			ioex.printStackTrace();
 			JOptionPane.showMessageDialog(frame, ioex.getMessage(), "Chyba", JOptionPane.ERROR_MESSAGE);
 		}
 	}
@@ -227,8 +230,23 @@ public class Starter {
 		xlsxMeta.setDataSheetIndex(parsePositionOrElse(xlsxDataSheetPosition.getText(), 0));
 		xlsxMeta.setTitleRowIndex(parsePositionOrElse(xlsxTitleRowPosition.getText(), 0));
 		xlsxMeta.setFile(new File(xlsxLocationField.getText()));
-		// TODO: validate before returning!!
+		
+//		xlsxMeta.setParentColumns(Arrays.asList("B", "C", "D", "H")); // toto potrebujem lepsie parsovat
+//		xlsxMeta.setPropertyColumns(Arrays.asList("F", "G", "I", "L")); // TODO: check if not null or empty !!
+		xlsxMeta.setParentColumns(Arrays.asList("B", "C", "D", "G")); // toto potrebujem lepsie parsovat
+		xlsxMeta.setPropertyColumns(Arrays.asList("F", "E", "H", "K")); // TODO: check if not null or empty !!
+		
+		validateXlsxSettings(xlsxMeta);
 		return xlsxMeta;
+	}
+
+	private void validateXlsxSettings(XlsxMetadata xlsxMeta) {
+		// if exists and is a regular file
+		if (!xlsxMeta.getFile().isFile()) {
+			throw new IllegalArgumentException("Vybratý súbor neexistuje");
+		} else if (xlsxMeta.getParentColumns().isEmpty()) {
+			throw new IllegalArgumentException("Minimálne jeden stĺpec z dokumentu musí byť vybratý");
+		}
 	}
 
 	private NodeStyle readNodeStyle() {
@@ -283,7 +301,7 @@ public class Starter {
 		return false;
 	}
 
-	private Wbs createWbs(List<Activity> activities) {
+	private Wbs createWbs(Map<String, Object> activities) {
 		return new Wbs.WbsBuilder()
 			.withStatusBasedTaskColoring(stateColorChecker.isSelected())
 			.makeBoxed(!boxedChecker.isSelected())

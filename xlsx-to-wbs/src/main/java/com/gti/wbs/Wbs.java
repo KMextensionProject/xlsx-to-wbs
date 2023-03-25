@@ -1,15 +1,19 @@
 package com.gti.wbs;
 
 import static com.gti.enums.DateFormat.SLOVAK_DATE_FORMAT;
+import static com.gti.util.StringUtils.repeat;
 import static java.lang.System.lineSeparator;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.gti.enums.TaskPriority;
+import com.gti.enums.TaskStatus;
 
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
@@ -20,7 +24,7 @@ public class Wbs {
 	private boolean boxed;
 	private boolean statusColoring;
 	private String topLevelNodeName;
-	private List<Activity> data;
+	private Map<String, Object> data;
 	private NodeStyle nodeStyle;
 	private String configuration;
 
@@ -91,60 +95,92 @@ public class Wbs {
 			return this;
 		}
 
-		public Wbs buildWbs(List<Activity> data) {
-			config.data = new ArrayList<>(data);
+		public Wbs buildWbs(Map<String, Object> data) {
+			config.data = new LinkedHashMap<>(data);
 			if (config.data.isEmpty()) {
 				throw new IllegalStateException("data must be defined");
 			}
+			StringBuilder configDef = new StringBuilder();
+			configDef.append(WBS_START_TAG);
+			appendStyleDefinition(configDef);
+			appendTopLevelNode(configDef);
+			appendData(data, configDef, 2);
+			configDef.append(WBS_END_TAG);
 
-			// extract to separate method
-			boxingTag = config.boxed ? " " : "_ ";
-			configuration.append(WBS_START_TAG);
-			appendStyleDefinition();
-			appendTopLevelNode();
-			appendData();
-			configuration.append(WBS_END_TAG);
-
-			config.configuration = configuration.toString();
+			System.out.println(configDef);
+			
+			config.configuration = configDef.toString();
 			return config;
 		}
 
-		private void appendStyleDefinition() {
+		// TODO: refactor
+		public void appendData(Map<String, Object> activities, StringBuilder configString, int level) {
+			int depth = level; 
+			for (Map.Entry<String, Object> entry : activities.entrySet()) {
+				configString.append(getLevelMark(depth)).append(boxingTag).append(entry.getKey()).append(System.lineSeparator());
+				Object value = entry.getValue();
+				if (value instanceof Map) {
+					Map<String, Object> valueMap = (Map<String, Object>) value;
+					appendData(valueMap, configString, depth + 1);
+//				} else if (value instanceof List) {
+				} else if (value instanceof Set) {
+					// line separator after task name must be removed so its properties are going into the same wbs box
+					configString.delete(configString.lastIndexOf(System.lineSeparator()), configString.length());
+					
+//					for (Map<String, Object> map : (List<Map<String, Object>>) value) {
+					for (Map<String, Object> map : (Set<Map<String, Object>>) value) {
+						boolean statusUnresolvedYet = config.statusColoring;
+						
+						for (Map.Entry<String, Object> task : map.entrySet()) {
+							
+							String propertyName = task.getKey();
+							
+							// if value is null, skip the whole element?
+							Object propertyValue = task.getValue();
+							
+							// if user doesnt want to use coloring
+							if (statusUnresolvedYet) {
+								// If the property value is one of task status values as described in doc,
+								// we can then apply the task coloring -- evaluate this once per task..
+								TaskStatus status = TaskStatus.getStatusByValue(String.valueOf(propertyValue));
+								if (TaskStatus.UNDEFINED != status) {
+									String colorSetting = status.getColorCode();
+									int taskStart = configString.lastIndexOf("*") + 1; // will be placed between the last asterix and the boxingTag
+									configString.insert(taskStart, colorSetting);
+									
+									statusUnresolvedYet = false;
+								}
+							}
+							configString.append("\\n").append(task.getKey()).append(": ");
+							configString.append(task.getValue());
+						}
+					}
+					configString.append(System.lineSeparator());
+				}
+			}
+		}
+
+		private String getLevelMark(int level) {
+			return repeat("*", level);
+		}
+
+		private void appendStyleDefinition(StringBuilder configuration) {
 			if (config.nodeStyle != null) {
 				configuration.append(lineSeparator())
 					.append(config.nodeStyle.getStyleDefinition());
 			}
 		}
 
-		private void appendTopLevelNode() {
-			configuration
+		private void appendTopLevelNode(StringBuilder configDef) {
+			configDef
 				  .append(lineSeparator())
 				  .append("*")
 				  .append(boxingTag);
 			if (config.topLevelNodeName == null) {
 				config.topLevelNodeName = "PROJEKT";
 			}
-			configuration.append(config.topLevelNodeName)
+			configDef.append(config.topLevelNodeName)
 			  	  .append(lineSeparator());
-		}
-
-		private void appendData() {
-			for (Activity activity : config.data) {
-				configuration.append("**");
-				appendName(activity);
-				for (Phase phase : activity.getPhases()) {
-					configuration.append("***");
-					appendName(phase);
-					for (Subactivity subactivity : phase.getSubactivities()) {
-						configuration.append("****");
-						appendName(subactivity);
-						for (Task task : subactivity.getTasks()) {
-							configuration.append("*****");
-							appendTask(task);
-						}
-					}
-				}
-			}
 		}
 
 		private void appendName(WbsObject wbsObject) {

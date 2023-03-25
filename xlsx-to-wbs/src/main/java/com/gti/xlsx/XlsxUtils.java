@@ -52,8 +52,8 @@ public class XlsxUtils {
 		private Object cellValue;
 		private boolean isUndefined;
 		private boolean isNull;
-		// isNumeric;
-		// isDate
+		private boolean isDate;
+		private boolean isNumeric;
 
 		public CellValue(Object value) {
 			if (value == null) {
@@ -61,6 +61,12 @@ public class XlsxUtils {
 			}
 			if ("N/A".equals(value)) {
 				this.isUndefined = true;
+			}
+			if (value instanceof java.util.Date) {
+				this.isDate = true;
+			}
+			if (value instanceof java.lang.Number) {
+				this.isNumeric = true;
 			}
 			cellValue = value;
 		}
@@ -71,6 +77,14 @@ public class XlsxUtils {
 
 		public boolean isUndefined() {
 			return this.isUndefined;
+		}
+
+		public boolean isDate() {
+			return isDate;
+		}
+
+		public boolean isNumeric() {
+			return isNumeric;
 		}
 
 		public String asString() {

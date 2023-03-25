@@ -12,4 +12,12 @@ public class StringUtils {
 			.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
 	}
 
+	public static String repeat(String what, int howMany) {
+		StringBuilder result = new StringBuilder(what);
+		for (int i = 1; i < howMany; i++) {
+			result.append(what);
+		}
+		return result.toString();
+	}
+
 }

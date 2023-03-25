@@ -4,6 +4,7 @@ import static com.gti.util.StringUtils.stripDiacritics;
 import static com.gti.xlsx.XlsxUtils.getCellValue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,7 +18,6 @@ import org.apache.poi.ss.usermodel.Row;
 public class ColumnMapper {
 
 	private static final List<String> COLUMN_CODE_MAP = Collections.unmodifiableList(initColumnCodes());
-
 	// TODO: do i need this now?
 
 	// having inverse map will provide constant time bidirectional map
