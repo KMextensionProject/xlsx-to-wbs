@@ -18,7 +18,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +38,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import com.gti.util.FileUtils;
-import com.gti.wbs.Activity;
 import com.gti.wbs.NodeStyle;
 import com.gti.wbs.NodeStyle.StyleBuilder;
 import com.gti.wbs.Wbs;
@@ -112,12 +111,14 @@ public class Starter {
 		panel.add(xlsxTitleRowPosition);
 
 		columnHierarchyLabel = new JLabel("Hierarchické označenie stĺpcov:");
-		xlsxParentColumnsField = createTextField(232, 25, "Príklad: C, A, D, E");
+		columnHierarchyLabel.setPreferredSize(new Dimension(225, 20));
+		xlsxParentColumnsField = createTextField(240, 25, "Príklad: C, A, D, E");
 		panel.add(columnHierarchyLabel);
 		panel.add(xlsxParentColumnsField);
 
-		columnPropertiesLabel = new JLabel("Vlastnosti posledného stĺpca:   ");
-		xlsxPropertyColumnsField = createTextField(232, 25, "Príklad: G, H, I, M, P, N");
+		columnPropertiesLabel = new JLabel("Vlastnosti posledného stĺpca:");
+		columnPropertiesLabel.setPreferredSize(new Dimension(225, 20));
+		xlsxPropertyColumnsField = createTextField(240, 25, "Príklad: G, H, I, M, P, N");
 		panel.add(columnPropertiesLabel);
 		panel.add(xlsxPropertyColumnsField);
 
@@ -219,9 +220,7 @@ public class Starter {
 	}
 
 	public void generateAndSaveWbs() {
-		if (missingMandatoryFields()) {
-			return;
-		} else if (wronglyChecked()) {
+		if (missingMandatoryFields() || wronglyChecked() || badHierarchyDefinitionSyntax()) {
 			return;
 		}
 		String outFile = validateAndGetOutputFile("WBS", (FileFormat) outputFileTypeCombo.getSelectedItem());
@@ -244,23 +243,28 @@ public class Starter {
 		xlsxMeta.setDataSheetIndex(parsePositionOrElse(xlsxDataSheetPosition.getText(), 0));
 		xlsxMeta.setTitleRowIndex(parsePositionOrElse(xlsxTitleRowPosition.getText(), 0));
 		xlsxMeta.setFile(new File(xlsxLocationField.getText()));
-		
-//		xlsxMeta.setParentColumns(Arrays.asList("B", "C", "D", "H")); // toto potrebujem lepsie parsovat
-//		xlsxMeta.setPropertyColumns(Arrays.asList("F", "G", "I", "L")); // TODO: check if not null or empty !!
-		xlsxMeta.setParentColumns(Arrays.asList("B", "C", "D", "G")); // toto potrebujem lepsie parsovat
-		xlsxMeta.setPropertyColumns(Arrays.asList("F", "E", "H", "K", "M", "O")); // TODO: check if not null or empty !!
-
-		validateXlsxSettings(xlsxMeta);
+		if (!xlsxMeta.getFile().isFile()) {
+			throw new IllegalArgumentException("Vybratý súbor neexistuje");
+		}
+		xlsxMeta.setParentColumns(parseXlsxColumns(xlsxParentColumnsField));
+		xlsxMeta.setPropertyColumns(parseXlsxColumns(xlsxPropertyColumnsField));
 		return xlsxMeta;
 	}
 
-	private void validateXlsxSettings(XlsxMetadata xlsxMeta) {
-		// if exists and is a regular file
-		if (!xlsxMeta.getFile().isFile()) {
-			throw new IllegalArgumentException("Vybratý súbor neexistuje");
-		} else if (xlsxMeta.getParentColumns().isEmpty()) {
-			throw new IllegalArgumentException("Minimálne jeden stĺpec z dokumentu musí byť vybratý");
+	private static List<String> parseXlsxColumns(JTextField field) {
+		String[] codes = field.getText().split(",");
+		List<String> codesList = new ArrayList<>();
+		for (String code : codes) {
+			code = code.trim();
+			if (!code.isEmpty()) {
+				// if user can pass column name then ok, but if can't then it is not valid.. TODO: decide what it will be
+				if (code.length() > 1) {
+					throw new IllegalArgumentException("Stĺpec " + code + " je mimo povoleného rozsahu: [A-Z]");
+				}
+				codesList.add(code.toUpperCase());
+			}
 		}
+		return codesList;
 	}
 
 	private NodeStyle readNodeStyle() {
@@ -298,6 +302,12 @@ public class Starter {
 			}
 			errorMessage.append("názov hlavného prvku");
 		}
+		if (columnHierarchyLabel.getText().isEmpty()) {
+			if (errorMessage.length() != 0) {
+				errorMessage.append(", ");
+			}
+			errorMessage.append("hierarchia stĺpcov");
+		}
 		if (errorMessage.length() != 0) {
 			errorMessage.insert(0, "Nie sú vyplnené povinné polia: [");
 			errorMessage.append("]");
@@ -313,6 +323,39 @@ public class Starter {
 			return true;
 		}
 		return false;
+	}
+
+	private boolean badHierarchyDefinitionSyntax() {
+		String parentCols = xlsxParentColumnsField.getText().trim(); 
+		String propertyCols = xlsxPropertyColumnsField.getText().trim();
+
+		if (parentCols.isEmpty()) {
+			JOptionPane.showMessageDialog(frame, "Minimálne jeden stĺpec v hierarchii musí byť definovaný", "Chyba", JOptionPane.ERROR_MESSAGE);
+			return true;
+		}
+		if (!isParsable(parentCols) || (!propertyCols.isEmpty() && !isParsable(propertyCols))) {
+			JOptionPane.showMessageDialog(frame, "Stĺpce musia byť v rozsahu [A-Z] a oddelené čiarkou", "Chyba", JOptionPane.ERROR_MESSAGE);
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isParsable(String toBeParsed) {
+		if (toBeParsed.length() == 1 && Character.isLetter(toBeParsed.charAt(0))) {
+			return true;
+		}
+		boolean first;
+		boolean second;
+		toBeParsed = toBeParsed.replace(" ", "");
+		for (int i = 0, j = 1; j < toBeParsed.length(); i++, j++) {
+			first = Character.isLetter(toBeParsed.charAt(i));
+			second = Character.isLetter(toBeParsed.charAt(j));
+			// ak su oba znaky alebo ziaden
+			if (first == second) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private Wbs createWbs(Map<String, Object> activities) {
