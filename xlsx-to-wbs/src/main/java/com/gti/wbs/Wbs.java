@@ -67,7 +67,7 @@ public class Wbs {
 
 		private static final String WBS_START_TAG = "@startwbs";
 		private static final String WBS_END_TAG = "@endwbs";
-		private String boxingTag = " ";
+		private String boxingTag;
 
 		private StringBuilder configuration = new StringBuilder();
 		private final Wbs config = new Wbs();
@@ -100,6 +100,7 @@ public class Wbs {
 			if (config.data.isEmpty()) {
 				throw new IllegalStateException("data must be defined");
 			}
+			boxingTag = config.boxed ? " " : "_ ";
 			StringBuilder configDef = new StringBuilder();
 			configDef.append(WBS_START_TAG);
 			appendStyleDefinition(configDef);
@@ -114,6 +115,7 @@ public class Wbs {
 		}
 
 		// TODO: refactor
+		// TODO: display N/A values?
 		public void appendData(Map<String, Object> activities, StringBuilder configString, int level) {
 			int depth = level; 
 			for (Map.Entry<String, Object> entry : activities.entrySet()) {
@@ -122,15 +124,14 @@ public class Wbs {
 				if (value instanceof Map) {
 					Map<String, Object> valueMap = (Map<String, Object>) value;
 					appendData(valueMap, configString, depth + 1);
-//				} else if (value instanceof List) {
 				} else if (value instanceof Set) {
 					// line separator after task name must be removed so its properties are going into the same wbs box
 					configString.delete(configString.lastIndexOf(System.lineSeparator()), configString.length());
 					
-//					for (Map<String, Object> map : (List<Map<String, Object>>) value) {
 					for (Map<String, Object> map : (Set<Map<String, Object>>) value) {
 						boolean statusUnresolvedYet = config.statusColoring;
-						
+
+						// prechadzam kazdy task
 						for (Map.Entry<String, Object> task : map.entrySet()) {
 							
 							String propertyName = task.getKey();
@@ -138,7 +139,7 @@ public class Wbs {
 							// if value is null, skip the whole element?
 							Object propertyValue = task.getValue();
 							
-							// if user doesnt want to use coloring
+//							 //if user doesnt want to use coloring
 							if (statusUnresolvedYet) {
 								// If the property value is one of task status values as described in doc,
 								// we can then apply the task coloring -- evaluate this once per task..
@@ -147,7 +148,7 @@ public class Wbs {
 									String colorSetting = status.getColorCode();
 									int taskStart = configString.lastIndexOf("*") + 1; // will be placed between the last asterix and the boxingTag
 									configString.insert(taskStart, colorSetting);
-									
+
 									statusUnresolvedYet = false;
 								}
 							}
@@ -181,62 +182,6 @@ public class Wbs {
 			}
 			configDef.append(config.topLevelNodeName)
 			  	  .append(lineSeparator());
-		}
-
-		private void appendName(WbsObject wbsObject) {
-			configuration.append(boxingTag)
-				.append(wbsObject.getPositionNumber())
-				.append(" ")
-				.append(wbsObject.getDescription())
-				.append(lineSeparator());
-		}
-
-		private void appendTask(Task task) {
-			String name = task.getDescription();
-			String solver = task.getSolver();
-			String status = task.getStatus().getValue();
-			int percentage = task.getFinishedInPercent();
-			int priority = task.getPriority();
-
-			LocalDate dateFrom = task.getFrom();
-			LocalDate dateTo = task.getTo();
-			String from = dateFrom == null ? null : dateFrom.format(SLOVAK_DATE_FORMAT);
-			String to = dateTo == null ? null : dateTo.format(SLOVAK_DATE_FORMAT);
-
-			// if solver is N/A -> it isn't there ...make that disappear somehow
-			// wait for mbartko what he will say about the undefined fields
-
-			configuration.append(config.statusColoring ? task.getStatus().getColorCode() : "")
-				.append(boxingTag)
-				.append(task.getPositionNumber())
-				.append(" ")
-				.append(name);
-
-			// if null -> do not appear them ..dates can also be N/A but it translates to null
-			if (solver != null) {
-				configuration.append("\\nRiešiteľ: ").append(solver);
-			}
-			if (status != null) {
-				configuration.append("\\nStav: ")
-					.append(status);
-					if (percentage >= 0) {
-						configuration.append(" (")
-							.append(percentage)
-							.append("%)");
-					}
-			}
-			// should it be displayed even if it is excluded?
-			if (priority >= TaskPriority.EXCLUDED) {
-				configuration.append("\\nPriorita: ").append(priority);
-			}
-			if (from != null) {
-				configuration.append("\\nOd: ").append(from);
-			}
-			if (to != null) {
-				configuration.append("\\nDo: ").append(to);
-			}
-
-			configuration.append(lineSeparator());
 		}
 	}
 }

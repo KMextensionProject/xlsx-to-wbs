@@ -55,11 +55,15 @@ public class Starter {
 	private JPanel panel;
 	private JTextField xlsxLocationField;
 	private JTextField xlsxDataSheetPosition;
+	private JTextField xlsxParentColumnsField;
+	private JTextField xlsxPropertyColumnsField;
 	private JTextField xlsxTitleRowPosition;
 	private JTextField topElementNameField;
 	private JTextField nodeTextPixelWidthField;
 	private JLabel dataSheetPositionLabel;
 	private JLabel titleRowLabel;
+	private JLabel columnHierarchyLabel;
+	private JLabel columnPropertiesLabel;
 	private JLabel topElementNameLabel;
 	private JLabel nodeThemeLabel;
 	private JLabel nodeTextPixelWidthLabel;
@@ -86,8 +90,8 @@ public class Starter {
 	}
 
 	private void createUI() {
-		frame = createFrame(485, 370);
-		panel = createPanel(485, 370);
+		frame = createFrame(485, 420);
+		panel = createPanel(485, 420);
 		addFrameMenuBar();
 
 		xlsxLocationField = createTextField(380, 25);
@@ -107,6 +111,16 @@ public class Starter {
 		panel.add(titleRowLabel);
 		panel.add(xlsxTitleRowPosition);
 
+		columnHierarchyLabel = new JLabel("Hierarchické označenie stĺpcov:");
+		xlsxParentColumnsField = createTextField(232, 25, "Príklad: C, A, D, E");
+		panel.add(columnHierarchyLabel);
+		panel.add(xlsxParentColumnsField);
+
+		columnPropertiesLabel = new JLabel("Vlastnosti posledného stĺpca:   ");
+		xlsxPropertyColumnsField = createTextField(232, 25, "Príklad: G, H, I, M, P, N");
+		panel.add(columnPropertiesLabel);
+		panel.add(xlsxPropertyColumnsField);
+
 		wbsSectionSeparator = new JSeparator(SwingConstants.HORIZONTAL);
 		wbsSectionSeparator.setAlignmentX(SwingConstants.CENTER);
 		wbsSectionSeparator.setPreferredSize(new Dimension(465, 4));
@@ -116,7 +130,7 @@ public class Starter {
 		topElementNameField = createTextField(180, 25, "Zvyčajne sa udáva názov projektu");
 		panel.add(topElementNameLabel);
 		panel.add(topElementNameField);
-		
+
 		nodeTextPixelWidthLabel = new JLabel("Šírka WBS prvku: ");
 		nodeTextPixelWidthField = createNumericTextField(60, 25, "Udáva sa v pixeloch. (prázdne = bez limitu/zalomenia textu)", 400);
 		panel.add(nodeTextPixelWidthLabel);
@@ -234,8 +248,8 @@ public class Starter {
 //		xlsxMeta.setParentColumns(Arrays.asList("B", "C", "D", "H")); // toto potrebujem lepsie parsovat
 //		xlsxMeta.setPropertyColumns(Arrays.asList("F", "G", "I", "L")); // TODO: check if not null or empty !!
 		xlsxMeta.setParentColumns(Arrays.asList("B", "C", "D", "G")); // toto potrebujem lepsie parsovat
-		xlsxMeta.setPropertyColumns(Arrays.asList("F", "E", "H", "K")); // TODO: check if not null or empty !!
-		
+		xlsxMeta.setPropertyColumns(Arrays.asList("F", "E", "H", "K", "M", "O")); // TODO: check if not null or empty !!
+
 		validateXlsxSettings(xlsxMeta);
 		return xlsxMeta;
 	}

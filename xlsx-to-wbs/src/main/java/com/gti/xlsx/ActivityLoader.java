@@ -15,6 +15,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.gti.enums.DateFormat;
+import com.gti.xlsx.XlsxUtils.CellValue;
+
 // to generalize the whole tool...I should use maps instead of pojos since, the hierarchy level can vary
 public class ActivityLoader {
 
@@ -43,7 +46,7 @@ public class ActivityLoader {
 			for (int j = 0; j < parentColumns.size(); j++) {
 				String columnCode = parentColumns.get(j);
 				// should the mapper's method be generic for name and code? ..it would be useful for user maybe
-				value = getCellValue(row.getCell(mapper.getColumnIndex(columnCode))).asString(); // better value resolving.. for testing let it be string
+				value = getCellValue(row.getCell(mapper.getColumnIndex(columnCode))).asString(); // parents are always string
 
 				if (!parent.containsKey(value)) {
 					parent.put(value, new LinkedHashMap<>());
@@ -55,29 +58,40 @@ public class ActivityLoader {
 			}
 
 			// process properties
-			Map<String, Object> taskData = new LinkedHashMap<>();
-			for (String columnCode : xlsxMeta.getPropertyColumns()) {
-				int columnIndex = mapper.getColumnIndex(columnCode);
-				String taskValue = getCellValue(row.getCell(columnIndex)).asString();
-				taskData.put(mapper.getColumnName(columnIndex), taskValue);
-			}
+			if (!xlsxMeta.getPropertyColumns().isEmpty()) {
+				Map<String, Object> taskData = new LinkedHashMap<>();
+				for (String columnCode : xlsxMeta.getPropertyColumns()) {
+					int columnIndex = mapper.getColumnIndex(columnCode);
+					CellValue cellValue = getCellValue(row.getCell(columnIndex));
 
-//			Object parentContent = parent.get(value);
-//			if (parentContent instanceof Map) {
-//				List<Map<String, Object>> taskList = new ArrayList<>();
-//				taskList.add(taskData);
-//				parent.put(value, taskList);
-//			} else if (parentContent instanceof List) {
-//				((List<Map<String, Object>>)parentContent).add(taskData);
-//			}
-			
-			Object parentContent = parent.get(value);
-			if (parentContent instanceof Map) {
-				Set<Map<String, Object>> taskList = new LinkedHashSet<>();
-				taskList.add(taskData);
-				parent.put(value, taskList);
-			} else if (parentContent instanceof Set) {
-				((Set<Map<String, Object>>)parentContent).add(taskData);
+					Object taskValue = null;
+					if (cellValue.isDate()) {
+						taskValue = cellValue.asLocalDate().format(DateFormat.SLOVAK_DATE_FORMAT);
+					}
+//				else if (cellValue.isNumeric()) {
+					// TODO: implement percentage display value argument that should come with colum
+					// identifier
+//					boolean should_display_as_percent = true;
+//					if (should_display_as_percent) {
+//						taskValue = cellValue.asInt(e -> e * 100) + "%";
+//					} else {
+//						taskValue = cellValue.asInt() + "";
+//					}
+//				} 
+					else {
+						taskValue = getCellValue(row.getCell(columnIndex)).asString();
+					}
+					taskData.put(mapper.getColumnName(columnIndex), taskValue);
+				}
+
+				Object parentContent = parent.get(value);
+				if (parentContent instanceof Map) {
+					Set<Map<String, Object>> taskList = new LinkedHashSet<>();
+					taskList.add(taskData);
+					parent.put(value, taskList);
+				} else if (parentContent instanceof Set) {
+					((Set<Map<String, Object>>) parentContent).add(taskData);
+				}
 			}
 		}
 

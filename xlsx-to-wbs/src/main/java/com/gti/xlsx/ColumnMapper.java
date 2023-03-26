@@ -37,7 +37,8 @@ public class ColumnMapper {
 	private void init(Row titleRow) {
 		for (Iterator<Cell> cellIterator = titleRow.cellIterator(); cellIterator.hasNext();) {
 			Cell cell = cellIterator.next();
-			String columnName = stripDiacritics(getCellValue(cell).asString().toLowerCase());
+//			String columnName = stripDiacritics(getCellValue(cell).asString().toLowerCase());
+			String columnName = getCellValue(cell).asString();
 			int columnIndex = cell.getColumnIndex();
 
 			nameIndexMap.put(columnName, columnIndex);
@@ -55,6 +56,7 @@ public class ColumnMapper {
 		return columnCodes;
 	}
 
+	// search by column name that has stripped diacritics?
 	public int getColumnIndex(String columnCodeOrName) {
 		int index = COLUMN_CODE_MAP.indexOf(columnCodeOrName);
 		if (index == -1) {
@@ -80,6 +82,7 @@ public class ColumnMapper {
 		return orElse;
 	}
 
+	// return real column name
 	public String getColumnName(int columnIndex) {
 		String columnName = indexNameMap.get(columnIndex);
 		if (columnName == null) {
