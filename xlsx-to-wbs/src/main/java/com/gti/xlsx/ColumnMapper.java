@@ -1,10 +1,8 @@
 package com.gti.xlsx;
 
-import static com.gti.util.StringUtils.stripDiacritics;
 import static com.gti.xlsx.XlsxUtils.getCellValue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,11 +12,9 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 
-// create mapper for top hierarchy and then for childs
 public class ColumnMapper {
 
 	private static final List<String> COLUMN_CODE_MAP = Collections.unmodifiableList(initColumnCodes());
-	// TODO: do i need this now?
 
 	// having inverse map will provide constant time bidirectional map
 	private final Map<String, Integer> nameIndexMap;
@@ -37,7 +33,6 @@ public class ColumnMapper {
 	private void init(Row titleRow) {
 		for (Iterator<Cell> cellIterator = titleRow.cellIterator(); cellIterator.hasNext();) {
 			Cell cell = cellIterator.next();
-//			String columnName = stripDiacritics(getCellValue(cell).asString().toLowerCase());
 			String columnName = getCellValue(cell).asString();
 			int columnIndex = cell.getColumnIndex();
 
@@ -56,7 +51,6 @@ public class ColumnMapper {
 		return columnCodes;
 	}
 
-	// search by column name that has stripped diacritics?
 	public int getColumnIndex(String columnCodeOrName) {
 		int index = COLUMN_CODE_MAP.indexOf(columnCodeOrName);
 		if (index == -1) {
@@ -73,7 +67,6 @@ public class ColumnMapper {
 		return index.intValue();	
 	}
 
-	// TODO: by code?
 	public int getColumnIndex(String columnName, int orElse) {
 		Integer index = nameIndexMap.get(columnName);
 		if (index != null) {
@@ -82,7 +75,6 @@ public class ColumnMapper {
 		return orElse;
 	}
 
-	// return real column name
 	public String getColumnName(int columnIndex) {
 		String columnName = indexNameMap.get(columnIndex);
 		if (columnName == null) {
@@ -91,7 +83,6 @@ public class ColumnMapper {
 		return columnName;
 	}
 
-	// TODO: getColumnName by code or columnIndex
 	public String getColumnName(int columnIndex, String orElse) {
 		String columnName = indexNameMap.get(columnIndex);
 		if (columnName != null) {

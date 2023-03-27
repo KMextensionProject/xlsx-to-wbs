@@ -42,6 +42,7 @@ import com.gti.wbs.NodeStyle;
 import com.gti.wbs.NodeStyle.StyleBuilder;
 import com.gti.wbs.Wbs;
 import com.gti.xlsx.ActivityLoader;
+import com.gti.xlsx.ColumnProperty;
 import com.gti.xlsx.XlsxMetadata;
 
 import net.sourceforge.plantuml.FileFormat;
@@ -111,14 +112,14 @@ public class Starter {
 		panel.add(xlsxTitleRowPosition);
 
 		columnHierarchyLabel = new JLabel("Hierarchické označenie stĺpcov:");
-		columnHierarchyLabel.setPreferredSize(new Dimension(225, 20));
-		xlsxParentColumnsField = createTextField(240, 25, "Príklad: C, A, D, E");
+		columnHierarchyLabel.setPreferredSize(new Dimension(190, 20));
+		xlsxParentColumnsField = createTextField(225, 25, "Príklad: C, A, D, E");
 		panel.add(columnHierarchyLabel);
 		panel.add(xlsxParentColumnsField);
 
 		columnPropertiesLabel = new JLabel("Vlastnosti posledného stĺpca:");
-		columnPropertiesLabel.setPreferredSize(new Dimension(225, 20));
-		xlsxPropertyColumnsField = createTextField(240, 25, "Príklad: G, H, I, M, P, N");
+		columnPropertiesLabel.setPreferredSize(new Dimension(190, 20));
+		xlsxPropertyColumnsField = createTextField(225, 25, "Príklad: G, H, I, M, P, N");
 		panel.add(columnPropertiesLabel);
 		panel.add(xlsxPropertyColumnsField);
 
@@ -246,22 +247,24 @@ public class Starter {
 		if (!xlsxMeta.getFile().isFile()) {
 			throw new IllegalArgumentException("Vybratý súbor neexistuje");
 		}
-		xlsxMeta.setParentColumns(parseXlsxColumns(xlsxParentColumnsField));
-		xlsxMeta.setPropertyColumns(parseXlsxColumns(xlsxPropertyColumnsField));
+		xlsxMeta.setParentColumnsProperties(parseXlsxColumns(xlsxParentColumnsField));
+		xlsxMeta.setPropertyColumnsProperties(parseXlsxColumns(xlsxPropertyColumnsField));
 		return xlsxMeta;
 	}
 
-	private static List<String> parseXlsxColumns(JTextField field) {
+	private static List<ColumnProperty> parseXlsxColumns(JTextField field) {
 		String[] codes = field.getText().split(",");
-		List<String> codesList = new ArrayList<>();
+		List<ColumnProperty> codesList = new ArrayList<>();
 		for (String code : codes) {
 			code = code.trim();
 			if (!code.isEmpty()) {
-				// if user can pass column name then ok, but if can't then it is not valid.. TODO: decide what it will be
+				// constructor will process and split percentage mark
+				ColumnProperty property = new ColumnProperty(code);
+				code = property.getLocationCode();
 				if (code.length() > 1) {
 					throw new IllegalArgumentException("Stĺpec " + code + " je mimo povoleného rozsahu: [A-Z]");
 				}
-				codesList.add(code.toUpperCase());
+				codesList.add(property);
 			}
 		}
 		return codesList;
@@ -346,7 +349,7 @@ public class Starter {
 		}
 		boolean first;
 		boolean second;
-		toBeParsed = toBeParsed.replace(" ", "");
+		toBeParsed = toBeParsed.replace(" ", "").replace("%", ""); // [//s//%]*$
 		for (int i = 0, j = 1; j < toBeParsed.length(); i++, j++) {
 			first = Character.isLetter(toBeParsed.charAt(i));
 			second = Character.isLetter(toBeParsed.charAt(j));

@@ -18,14 +18,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.gti.enums.DateFormat;
 import com.gti.xlsx.XlsxUtils.CellValue;
 
-// to generalize the whole tool...I should use maps instead of pojos since, the hierarchy level can vary
 public class ActivityLoader {
 
 	// A -> first column in first sheet
-	// 2:C -> third column in the second sheet
 	// D:% -> fourth column in the first sheet should be displayed as percentage
 
-	// TODO: keys should be the values of the colum, so I could use them as the labels for task properties
 	// TODO: this is the place where I can add positioner
 	// TODO: split into smaller methods
 	@SuppressWarnings("unchecked")
@@ -40,14 +37,12 @@ public class ActivityLoader {
 			Row row = sheet.getRow(i);
 
 			// process main hierarchy
-			List<String> parentColumns = xlsxMeta.getParentColumns();
+			List<ColumnProperty> parentColumns = xlsxMeta.getParentColumnProperties();
 			Map<String, Object> parent = activities;
 			String value = null;
 			for (int j = 0; j < parentColumns.size(); j++) {
-				String columnCode = parentColumns.get(j);
-				// should the mapper's method be generic for name and code? ..it would be useful for user maybe
+				String columnCode = parentColumns.get(j).getLocationCode();
 				value = getCellValue(row.getCell(mapper.getColumnIndex(columnCode))).asString(); // parents are always string
-
 				if (!parent.containsKey(value)) {
 					parent.put(value, new LinkedHashMap<>());
 				}
@@ -58,29 +53,13 @@ public class ActivityLoader {
 			}
 
 			// process properties
-			if (!xlsxMeta.getPropertyColumns().isEmpty()) {
+			if (!xlsxMeta.getPropertyColumnProperties().isEmpty()) {
 				Map<String, Object> taskData = new LinkedHashMap<>();
-				for (String columnCode : xlsxMeta.getPropertyColumns()) {
+				for (ColumnProperty columnProperty : xlsxMeta.getPropertyColumnProperties()) {
+					String columnCode = columnProperty.getLocationCode();
 					int columnIndex = mapper.getColumnIndex(columnCode);
 					CellValue cellValue = getCellValue(row.getCell(columnIndex));
-
-					Object taskValue = null;
-					if (cellValue.isDate()) {
-						taskValue = cellValue.asLocalDate().format(DateFormat.SLOVAK_DATE_FORMAT);
-					}
-//				else if (cellValue.isNumeric()) {
-					// TODO: implement percentage display value argument that should come with colum
-					// identifier
-//					boolean should_display_as_percent = true;
-//					if (should_display_as_percent) {
-//						taskValue = cellValue.asInt(e -> e * 100) + "%";
-//					} else {
-//						taskValue = cellValue.asInt() + "";
-//					}
-//				} 
-					else {
-						taskValue = getCellValue(row.getCell(columnIndex)).asString();
-					}
+					Object taskValue = resolveTaskValue(cellValue, columnProperty);
 					taskData.put(mapper.getColumnName(columnIndex), taskValue);
 				}
 
@@ -98,6 +77,19 @@ public class ActivityLoader {
 		workbook.close();
 
 		return activities;
+	}
+
+	private Object resolveTaskValue(CellValue cellValue, ColumnProperty columnProperty) {
+		if (cellValue.isDate()) {
+			return cellValue.asLocalDate().format(DateFormat.SLOVAK_DATE_FORMAT);
+		} else if (cellValue.isNumeric()) {
+			return columnProperty.hasPercentageIndicator() 
+					? cellValue.asInt(e -> e * 100) + "" 
+					: cellValue.asInt() + "";
+		}
+		else {
+			return cellValue.asString();
+		}
 	}
 
 }

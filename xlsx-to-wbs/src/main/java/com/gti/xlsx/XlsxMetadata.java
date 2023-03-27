@@ -15,16 +15,13 @@ public class XlsxMetadata {
 	private File file;
 	private int dataSheetIndex;
 	private int titleRowIndex;
-	// TODO: list of more complex object with resolving % and sheet # if the child elements or other elements in hierarchy resides in different sheet ? (relational db)
-	// these must not be empty and at least one must be present
-	List<String> parentColumns; // A, B, C, E [names will not be displayed]
-	// these may be empty, but they represent properties of the last column in the hierarchy
-	List<String> propertyColumns; // D, F, M, AB, AS // TODO: I need to have the title names because they will be displayed
+	private List<ColumnProperty> parentColumnsProperties;
+	private List<ColumnProperty> propertyColumnsProperties;
 
 	public XlsxMetadata() {
 		// zeroes are default
-		parentColumns = new ArrayList<>();
-		propertyColumns = new ArrayList<>();
+		parentColumnsProperties = new ArrayList<>();
+		propertyColumnsProperties = new ArrayList<>();
 	}
 
 	public XlsxMetadata(File file) {
@@ -61,38 +58,30 @@ public class XlsxMetadata {
 		return this.titleRowIndex;
 	}
 
-	public void addPropertyColumn(String location) {
-		this.propertyColumns.add(location);
+	public List<ColumnProperty> getParentColumnProperties() {
+		return new ArrayList<>(parentColumnsProperties);
 	}
 
-	public List<String> getPropertyColumns() {
-		return new ArrayList<>(propertyColumns);
+	public List<ColumnProperty> getPropertyColumnProperties() {
+		return new ArrayList<>(propertyColumnsProperties);
 	}
 
-	public void addParentColumn(String location) {
-		this.parentColumns.add(location);
-	}
-
-	public List<String> getParentColumns() {
-		return new ArrayList<>(parentColumns);
-	}
-
-	public void setParentColumns(List<String> parentCols) {
-		if (parentCols != null) {
-			if (this.parentColumns.isEmpty()) {
-				this.parentColumns.addAll(parentCols);
+	public void setParentColumnsProperties(List<ColumnProperty> parentCols) {
+		if (parentColumnsProperties != null) {
+			if (this.parentColumnsProperties.isEmpty()) {
+				this.parentColumnsProperties.addAll(parentCols);
 			} else {
-				this.parentColumns = new ArrayList<>(parentCols);
+				this.parentColumnsProperties = new ArrayList<>(parentCols);
 			}
 		}
 	}
 
-	public void setPropertyColumns(List<String> propertyCols) {
+	public void setPropertyColumnsProperties(List<ColumnProperty> propertyCols) {
 		if (propertyCols != null) {
-			if (this.propertyColumns.isEmpty()) {
-				this.propertyColumns.addAll(propertyCols);
+			if (this.propertyColumnsProperties.isEmpty()) {
+				this.propertyColumnsProperties.addAll(propertyCols);
 			} else {
-				this.propertyColumns = new ArrayList<>(propertyCols);
+				this.propertyColumnsProperties = new ArrayList<>(propertyCols);
 			}
 		}
 	}

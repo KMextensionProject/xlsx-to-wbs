@@ -1,18 +1,14 @@
 package com.gti.wbs;
 
-import static com.gti.enums.DateFormat.SLOVAK_DATE_FORMAT;
 import static com.gti.util.StringUtils.repeat;
 import static java.lang.System.lineSeparator;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.gti.enums.TaskPriority;
 import com.gti.enums.TaskStatus;
 
 import net.sourceforge.plantuml.FileFormat;
@@ -69,7 +65,6 @@ public class Wbs {
 		private static final String WBS_END_TAG = "@endwbs";
 		private String boxingTag;
 
-		private StringBuilder configuration = new StringBuilder();
 		private final Wbs config = new Wbs();
 
 		public WbsBuilder makeBoxed(boolean boxed) {
@@ -105,64 +100,74 @@ public class Wbs {
 			configDef.append(WBS_START_TAG);
 			appendStyleDefinition(configDef);
 			appendTopLevelNode(configDef);
-			appendData(data, configDef, 2);
+			appendActivities(data, configDef, 2);
 			configDef.append(WBS_END_TAG);
 
 			System.out.println(configDef);
-			
 			config.configuration = configDef.toString();
 			return config;
 		}
 
 		// TODO: refactor
-		// TODO: display N/A values?
-		public void appendData(Map<String, Object> activities, StringBuilder configString, int level) {
+		// TODO: display N/A values? let user specify which values to omit?
+		@SuppressWarnings("unchecked")
+		public void appendActivities(Map<String, Object> activities, StringBuilder configString, int level) {
 			int depth = level; 
 			for (Map.Entry<String, Object> entry : activities.entrySet()) {
-				configString.append(getLevelMark(depth)).append(boxingTag).append(entry.getKey()).append(System.lineSeparator());
+				configString.append(getLevelMark(depth))
+							.append(boxingTag)
+							.append(entry.getKey())
+							.append(System.lineSeparator());
+
 				Object value = entry.getValue();
 				if (value instanceof Map) {
 					Map<String, Object> valueMap = (Map<String, Object>) value;
-					appendData(valueMap, configString, depth + 1);
+					appendActivities(valueMap, configString, depth + 1);
 				} else if (value instanceof Set) {
-					// line separator after task name must be removed so its properties are going into the same wbs box
-					configString.delete(configString.lastIndexOf(System.lineSeparator()), configString.length());
-					
-					for (Map<String, Object> map : (Set<Map<String, Object>>) value) {
-						boolean statusUnresolvedYet = config.statusColoring;
-
-						// prechadzam kazdy task
-						for (Map.Entry<String, Object> task : map.entrySet()) {
-							
-							String propertyName = task.getKey();
-							
-							// if value is null, skip the whole element?
-							Object propertyValue = task.getValue();
-							
-//							 //if user doesnt want to use coloring
-							if (statusUnresolvedYet) {
-								// If the property value is one of task status values as described in doc,
-								// we can then apply the task coloring -- evaluate this once per task..
-								TaskStatus status = TaskStatus.getStatusByValue(String.valueOf(propertyValue));
-								if (TaskStatus.UNDEFINED != status) {
-									String colorSetting = status.getColorCode();
-									int taskStart = configString.lastIndexOf("*") + 1; // will be placed between the last asterix and the boxingTag
-									configString.insert(taskStart, colorSetting);
-
-									statusUnresolvedYet = false;
-								}
-							}
-							configString.append("\\n").append(task.getKey()).append(": ");
-							configString.append(task.getValue());
-						}
-					}
-					configString.append(System.lineSeparator());
+					appendTasks(configString, (Set<Map<String, Object>>) value);
 				}
 			}
 		}
 
+		private void appendTasks(StringBuilder configString, Set<Map<String, Object>> tasks) {
+			// line separator after task name must be removed so its properties are going into the same wbs box
+			configString.delete(configString.lastIndexOf(System.lineSeparator()), configString.length());
+
+			for (Map<String, Object> task : tasks) {
+				boolean statusUnresolvedYet = config.statusColoring;
+				for (Map.Entry<String, Object> taskEntry : task.entrySet()) {
+					Object propertyValue = taskEntry.getValue();
+
+					if (statusUnresolvedYet) {
+						// If the property value is one of task status values as described 
+						// in the doc, we can then apply the task coloring if it is desired
+						TaskStatus status = TaskStatus.getStatusByValue(String.valueOf(propertyValue));
+
+						// move to separate method
+						if (TaskStatus.UNDEFINED != status) {
+							int taskStart = configString.lastIndexOf("*") + 1; // between the last asterisk and the boxedTag
+							if (colorNotPresent(configString, taskStart)) {
+								String colorSetting = status.getColorCode();
+								configString.insert(taskStart, colorSetting);
+							}
+							statusUnresolvedYet = false;
+						}
+					}
+					configString.append("\\n")
+						.append(taskEntry.getKey())
+						.append(": ")
+						.append(taskEntry.getValue());
+				}
+			}
+			configString.append(System.lineSeparator());
+		}
+
 		private String getLevelMark(int level) {
 			return repeat("*", level);
+		}
+
+		private boolean colorNotPresent(StringBuilder uml, int fromIndex) {
+			return !uml.substring(fromIndex).startsWith("[#");
 		}
 
 		private void appendStyleDefinition(StringBuilder configuration) {
