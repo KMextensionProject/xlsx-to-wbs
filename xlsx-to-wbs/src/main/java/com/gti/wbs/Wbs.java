@@ -5,9 +5,13 @@ import static java.lang.System.lineSeparator;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import static java.util.stream.Collectors.joining;
 
 import com.gti.enums.TaskStatus;
 
@@ -60,6 +64,8 @@ public class Wbs {
 	}
 
 	public static class WbsBuilder {
+		// TODO: move to a separate class -> check usage below
+		private static final List<String> POS = new ArrayList<>(Arrays.asList(""));
 
 		private static final String WBS_START_TAG = "@startwbs";
 		private static final String WBS_END_TAG = "@endwbs";
@@ -100,7 +106,7 @@ public class Wbs {
 			configDef.append(WBS_START_TAG);
 			appendStyleDefinition(configDef);
 			appendTopLevelNode(configDef);
-			appendActivities(data, configDef, 2);
+			appendActivities(data, configDef, 1);
 			configDef.append(WBS_END_TAG);
 
 			System.out.println(configDef);
@@ -108,14 +114,15 @@ public class Wbs {
 			return config;
 		}
 
-		// TODO: refactor
+		// TODO: add position labeling here
 		// TODO: display N/A values? let user specify which values to omit?
 		@SuppressWarnings("unchecked")
 		public void appendActivities(Map<String, Object> activities, StringBuilder configString, int level) {
-			int depth = level; 
+			int depth = level;
 			for (Map.Entry<String, Object> entry : activities.entrySet()) {
 				configString.append(getLevelMark(depth))
 							.append(boxingTag)
+							.append(assignLevelNumber(depth))
 							.append(entry.getKey())
 							.append(System.lineSeparator());
 
@@ -129,6 +136,25 @@ public class Wbs {
 			}
 		}
 
+		// TODO: refactor this mess
+		private String assignLevelNumber(int depth) {
+			if (depth < POS.size()) {
+				POS.add(depth, (Integer.parseInt((POS.remove(depth))) + 1) + "");
+				for (int i = depth + 1; i < POS.size(); i++) {
+					POS.remove(i);
+				}
+			} else {
+				POS.add(1 + "");
+			}
+
+			for (int i = depth + 1; i < POS.size(); i++) {
+				POS.remove(i);
+			}
+
+			return POS.stream().skip(1).collect(joining(".")) + " ";
+		}
+
+		// TODO: refactor
 		private void appendTasks(StringBuilder configString, Set<Map<String, Object>> tasks) {
 			// line separator after task name must be removed so its properties are going into the same wbs box
 			configString.delete(configString.lastIndexOf(System.lineSeparator()), configString.length());
@@ -143,7 +169,6 @@ public class Wbs {
 						// in the doc, we can then apply the task coloring if it is desired
 						TaskStatus status = TaskStatus.getStatusByValue(String.valueOf(propertyValue));
 
-						// move to separate method
 						if (TaskStatus.UNDEFINED != status) {
 							int taskStart = configString.lastIndexOf("*") + 1; // between the last asterisk and the boxedTag
 							if (colorNotPresent(configString, taskStart)) {
@@ -163,7 +188,8 @@ public class Wbs {
 		}
 
 		private String getLevelMark(int level) {
-			return repeat("*", level);
+			// add 1 because of the first node which must be marked with one asterisk
+			return repeat("*", level + 1);
 		}
 
 		private boolean colorNotPresent(StringBuilder uml, int fromIndex) {

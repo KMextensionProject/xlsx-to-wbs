@@ -23,7 +23,6 @@ public class ActivityLoader {
 	// A -> first column in first sheet
 	// D:% -> fourth column in the first sheet should be displayed as percentage
 
-	// TODO: this is the place where I can add positioner
 	// TODO: split into smaller methods
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> loadFromXlsx (XlsxMetadata xlsxMeta) throws IOException {
