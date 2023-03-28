@@ -52,6 +52,12 @@ public class Wbs {
 		return this.nodeStyle;
 	}
 
+	/**
+	 * 
+	 * @param outputFile
+	 * @param fileFormat
+	 * @return
+	 */
 	public String save(String outputFile, FileFormat fileFormat) {
 		SourceStringReader reader = new SourceStringReader(getConfigurationString());
 		String result;
@@ -73,6 +79,10 @@ public class Wbs {
 
 		private final Wbs config = new Wbs();
 
+		/**
+		 *
+		 * @param boxed
+		 */
 		public WbsBuilder makeBoxed(boolean boxed) {
 			config.boxed = boxed;
 			return this;
@@ -86,16 +96,27 @@ public class Wbs {
 			return this;
 		}
 
+		/**
+		 *
+		 */
 		public WbsBuilder withTopLevelNodeName(String topLevelNodeName) {
 			config.topLevelNodeName = topLevelNodeName;
 			return this;
 		}
 
+		/**
+		 *
+		 */
 		public WbsBuilder withNodeStyle(NodeStyle nodeStyle) {
 			config.nodeStyle = nodeStyle;
 			return this;
 		}
 
+		/**
+		 *
+		 * @param data
+		 * @return
+		 */
 		public Wbs buildWbs(Map<String, Object> data) {
 			config.data = new LinkedHashMap<>(data);
 			if (config.data.isEmpty()) {
@@ -117,7 +138,7 @@ public class Wbs {
 		// TODO: add position labeling here
 		// TODO: display N/A values? let user specify which values to omit?
 		@SuppressWarnings("unchecked")
-		public void appendActivities(Map<String, Object> activities, StringBuilder configString, int level) {
+		private void appendActivities(Map<String, Object> activities, StringBuilder configString, int level) {
 			int depth = level;
 			for (Map.Entry<String, Object> entry : activities.entrySet()) {
 				configString.append(getLevelMark(depth))

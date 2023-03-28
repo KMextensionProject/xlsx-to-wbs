@@ -6,9 +6,6 @@ import java.util.List;
 
 /**
  * this holder describes excel meta data as defined by user..
- * TODO: perform validations on BL as well
- * 
- * index constraints, file location/existence, parentColumns size and so on..
  */
 public class XlsxMetadata {
 

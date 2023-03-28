@@ -24,6 +24,13 @@ public class ActivityLoader {
 	// D:% -> fourth column in the first sheet should be displayed as percentage
 
 	// TODO: split into smaller methods
+
+	/**
+	 *
+	 * @param xlsxMeta
+	 * @return
+	 * @throws IOException
+	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> loadFromXlsx (XlsxMetadata xlsxMeta) throws IOException {
 		Workbook workbook = new XSSFWorkbook(new FileInputStream(xlsxMeta.getFile()));
