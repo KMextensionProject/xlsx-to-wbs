@@ -51,15 +51,23 @@ public class ColumnMapper {
 		return columnCodes;
 	}
 
+	/**
+	 * Looks for the column index represented by the specified column code (one
+	 * of [A-Z]) or one denoted by the column name as specified by the title
+	 * row.
+	 *
+	 * @throws NoMappingFound
+	 *             if the column code or name is not found.
+	 */
 	public int getColumnIndex(String columnCodeOrName) {
 		int index = COLUMN_CODE_MAP.indexOf(columnCodeOrName);
 		if (index == -1) {
-			return resolveColumnIndex(columnCodeOrName);
+			return getColumnIndexByName(columnCodeOrName);
 		}
 		return index;
 	}
 
-	private int resolveColumnIndex(String columnName) {
+	private int getColumnIndexByName(String columnName) {
 		Integer index = nameIndexMap.get(columnName);
 		if (index == null) {
 			throw new NoMappingFound(columnName);
@@ -67,27 +75,18 @@ public class ColumnMapper {
 		return index.intValue();	
 	}
 
-	public int getColumnIndex(String columnName, int orElse) {
-		Integer index = nameIndexMap.get(columnName);
-		if (index != null) {
-			return index.intValue();
-		}
-		return orElse;
-	}
-
+	/**
+	 * Looks for column name in title row mapping for the specified index.
+	 *
+	 * @throws NoMappingFound
+	 *             if the column index is not mapped to any name from 
+	 *             the title row.
+	 */
 	public String getColumnName(int columnIndex) {
 		String columnName = indexNameMap.get(columnIndex);
 		if (columnName == null) {
 			throw new NoMappingFound(columnIndex);
 		}
 		return columnName;
-	}
-
-	public String getColumnName(int columnIndex, String orElse) {
-		String columnName = indexNameMap.get(columnIndex);
-		if (columnName != null) {
-			return columnName;
-		}
-		return orElse;
 	}
 }
