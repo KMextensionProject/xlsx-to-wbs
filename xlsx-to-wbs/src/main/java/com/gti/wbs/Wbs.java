@@ -55,8 +55,8 @@ public class Wbs {
 	public String save(String outputFile, FileFormat fileFormat) {
 		SourceStringReader reader = new SourceStringReader(getConfigurationString());
 		String result;
-		try {
-			result = reader.outputImage(new FileOutputStream(outputFile), new FileFormatOption(fileFormat)).getDescription();
+		try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
+			result = reader.outputImage(outputStream, new FileFormatOption(fileFormat)).getDescription();
 		} catch (IOException ioex) {
 			result = "ERROR: " + ioex.getMessage();
 		}
