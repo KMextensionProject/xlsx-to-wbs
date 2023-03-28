@@ -47,8 +47,6 @@ import com.gti.xlsx.XlsxMetadata;
 
 import net.sourceforge.plantuml.FileFormat;
 
-// TODO: generalize throwing exceptions
-
 public class Starter {
 
 	private JFrame frame;
@@ -187,10 +185,10 @@ public class Starter {
 			try {
 				Desktop.getDesktop().open(new File(getClass().getClassLoader().getResource("/Manual.pdf").toURI()));
 			} catch (Exception ioe) {
-				JOptionPane.showMessageDialog(frame, "Nie je možné zobraziť manuál, použi možnosť uloženia.", "Chyba", JOptionPane.ERROR_MESSAGE);
+				showErrorDialog("Nie je možné zobraziť manuál, použi možnosť uloženia.");
 			}
 		} else {
-			JOptionPane.showMessageDialog(frame, "Nie je možné zobraziť manuál, použi možnosť uloženia.", "Chyba", JOptionPane.ERROR_MESSAGE);
+			showErrorDialog("Nie je možné zobraziť manuál, použi možnosť uloženia.");
 		}
 	}
 
@@ -202,9 +200,9 @@ public class Starter {
 		try {
 			Path target = Paths.get(outputPath);
 			Files.copy(getClass().getClassLoader().getResourceAsStream("Manual.pdf"), target);
-			JOptionPane.showMessageDialog(frame, "Manuál bol úspešne uložený.", "Uloženie", JOptionPane.INFORMATION_MESSAGE);
+			showInfoDialog("Uloženie", "Manuál bol úspešne uložený.");
 		} catch (Exception ioex) {
-			JOptionPane.showMessageDialog(frame, "Nie je možné uložiť manuál, použi možnosť zobrazenia.", "Chyba", JOptionPane.ERROR_MESSAGE);
+			showErrorDialog("Nie je možné uložiť manuál, použi možnosť zobrazenia.");
 		}
 	}
 
@@ -215,7 +213,7 @@ public class Starter {
 			if (files[0].getAbsolutePath().endsWith("xlsx")) {
 				textField.setText(files[0].getAbsolutePath());
 			} else {
-				JOptionPane.showMessageDialog(frame, "Súbor musí byť typu xlsx", "Chyba", JOptionPane.ERROR_MESSAGE);
+				showErrorDialog("Súbor musí byť typu xlsx");
 			}
 		}
 	}
@@ -232,10 +230,10 @@ public class Starter {
 		try {
 			Wbs wbs = createWbs(activityLoader.loadFromXlsx(readXlsxMetadata())); 
 			wbs.save(outFile, (FileFormat) outputFileTypeCombo.getSelectedItem());
-			JOptionPane.showMessageDialog(frame, "WBS vytvorené: " + outFile, "Generovanie dokončené", JOptionPane.INFORMATION_MESSAGE);
+			showInfoDialog("Generovanie dokončené", "WBS vytvorené: " + outFile);
 		} catch (Exception ioex) {
 			ioex.printStackTrace();
-			JOptionPane.showMessageDialog(frame, ioex.getMessage(), "Chyba", JOptionPane.ERROR_MESSAGE);
+			showErrorDialog(ioex.getMessage());
 		}
 	}
 
@@ -314,7 +312,7 @@ public class Starter {
 		if (errorMessage.length() != 0) {
 			errorMessage.insert(0, "Nie sú vyplnené povinné polia: [");
 			errorMessage.append("]");
-			JOptionPane.showMessageDialog(frame, errorMessage, "Chyba", JOptionPane.ERROR_MESSAGE);
+			showErrorDialog(errorMessage.toString());
 			return true;
 		}
 		return false;
@@ -322,7 +320,7 @@ public class Starter {
 
 	private boolean wronglyChecked() {
 		if (stateColorChecker.isSelected() && boxedChecker.isSelected()) {
-			JOptionPane.showMessageDialog(frame, "Nie je možné označiť obe zaškrtávacie políčka", "Chyba", JOptionPane.ERROR_MESSAGE);
+			showErrorDialog("Nie je možné označiť obe zaškrtávacie políčka");
 			return true;
 		}
 		return false;
@@ -333,11 +331,11 @@ public class Starter {
 		String propertyCols = xlsxPropertyColumnsField.getText().trim();
 
 		if (parentCols.isEmpty()) {
-			JOptionPane.showMessageDialog(frame, "Minimálne jeden stĺpec v hierarchii musí byť definovaný", "Chyba", JOptionPane.ERROR_MESSAGE);
+			showErrorDialog("Minimálne jeden stĺpec v hierarchii musí byť definovaný");
 			return true;
 		}
 		if (!isParsable(parentCols) || (!propertyCols.isEmpty() && !isParsable(propertyCols))) {
-			JOptionPane.showMessageDialog(frame, "Stĺpce musia byť v rozsahu [A-Z] a oddelené čiarkou", "Chyba", JOptionPane.ERROR_MESSAGE);
+			showErrorDialog("Stĺpce musia byť v rozsahu [A-Z] a oddelené čiarkou");
 			return true;
 		}
 		return false;
@@ -382,5 +380,13 @@ public class Starter {
 		} else {
 			return FileUtils.overrideFileExtensionIfDifferent(outFileName, extension);
 		}
+	}
+
+	private void showErrorDialog(String message) {
+		JOptionPane.showMessageDialog(frame, message, "Chyba", JOptionPane.ERROR_MESSAGE);
+	}
+
+	private void showInfoDialog(String title, String message) {
+		JOptionPane.showMessageDialog(frame, message, title, JOptionPane.INFORMATION_MESSAGE);
 	}
 }
