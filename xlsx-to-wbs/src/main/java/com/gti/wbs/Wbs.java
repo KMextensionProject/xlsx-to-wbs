@@ -109,7 +109,7 @@ public class Wbs {
 			appendActivities(data, configDef, 1);
 			configDef.append(WBS_END_TAG);
 
-			System.out.println(configDef);
+//			System.out.println(configDef);
 			config.configuration = configDef.toString();
 			return config;
 		}

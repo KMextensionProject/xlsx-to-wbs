@@ -59,6 +59,7 @@ public class XlsxUtils {
 			if (value == null) {
 				this.isNull = true;
 			}
+			// toto ma byt else if + check ci to neni empty
 			if ("N/A".equals(value)) {
 				this.isUndefined = true;
 			}
