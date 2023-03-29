@@ -71,7 +71,7 @@ public class Wbs {
 
 	public static class WbsBuilder {
 		// TODO: move to a separate class -> check usage below
-		private static final List<String> POS = new ArrayList<>(Arrays.asList(""));
+		private final List<String> pos = new ArrayList<>(Arrays.asList(""));
 
 		private static final String WBS_START_TAG = "@startwbs";
 		private static final String WBS_END_TAG = "@endwbs";
@@ -159,20 +159,20 @@ public class Wbs {
 
 		// TODO: refactor this mess
 		private String assignLevelNumber(int depth) {
-			if (depth < POS.size()) {
-				POS.add(depth, (Integer.parseInt((POS.remove(depth))) + 1) + "");
-				for (int i = depth + 1; i < POS.size(); i++) {
-					POS.remove(i);
+			if (depth < pos.size()) {
+				pos.add(depth, (Integer.parseInt((pos.remove(depth))) + 1) + "");
+				for (int i = depth + 1; i < pos.size(); i++) {
+					pos.remove(i);
 				}
 			} else {
-				POS.add(1 + "");
+				pos.add(1 + "");
 			}
 
-			for (int i = depth + 1; i < POS.size(); i++) {
-				POS.remove(i);
+			for (int i = depth + 1; i < pos.size(); i++) {
+				pos.remove(i);
 			}
 
-			return POS.stream().skip(1).collect(joining(".")) + " ";
+			return pos.stream().skip(1).collect(joining(".")) + " ";
 		}
 
 		// TODO: refactor
