@@ -34,9 +34,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import com.gti.util.FileUtils;
 import com.gti.wbs.NodeStyle;
 import com.gti.wbs.NodeStyle.StyleBuilder;
@@ -84,7 +87,16 @@ public class Starter {
 
 	public Starter() {
 		activityLoader = new ActivityLoader();
+		setTheme(new FlatLightLaf());
 		createUI();
+	}
+
+	private void setTheme(LookAndFeel lookAndFeel) {
+		try {
+			UIManager.setLookAndFeel(lookAndFeel);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	private void createUI() {

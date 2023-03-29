@@ -10,33 +10,50 @@
 	<name>xlsx-to-wbs</name>
 	<url>http://maven.apache.org</url>
 
+	<developers>
+		<developer>
+			<organization>Gratex International, a.s.</organization>
+			<name>Martin Krajcovic</name>
+			<email>mkrajcovic@gratex.com</email>
+		</developer>
+	</developers>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 
 		<poi.version>3.12</poi.version>
+		<flatlaf.version>3.0</flatlaf.version>
 	</properties>
 
 	<dependencies>
+
+		<!-- processing xlsx -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
 			<version>${poi.version}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
 			<version>${poi.version}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml-schemas -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml-schemas</artifactId>
 			<version>${poi.version}</version>
 		</dependency>
+
+		<!-- lightweight 3rd party look and feel for swing -->
+		<dependency>
+			<groupId>com.formdev</groupId>
+			<artifactId>flatlaf</artifactId>
+			<version>${flatlaf.version}</version>
+		</dependency>
+
 	</dependencies>
 </project>
