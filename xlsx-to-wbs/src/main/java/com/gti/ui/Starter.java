@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -80,6 +81,8 @@ public class Starter {
 	private JButton startButton;
 	private JSeparator wbsSectionSeparator;
 	private ActivityLoader activityLoader;
+
+	private static final Logger LOG = Logger.getAnonymousLogger();
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(Starter::new);
@@ -171,7 +174,7 @@ public class Starter {
 		try {
 			UIManager.setLookAndFeel(lookAndFeel);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			LOG.warning(() -> "Unable to set " + lookAndFeel.getName() + " look and feel");
 		}
 	}
 
@@ -241,7 +244,7 @@ public class Starter {
 			wbs.save(outFile, (FileFormat) outputFileTypeCombo.getSelectedItem());
 			showInfoDialog("Generovanie dokončené", "WBS vytvorené: " + outFile);
 		} catch (Exception ioex) {
-			ioex.printStackTrace();
+			LOG.severe(() -> ioex.toString());
 			showErrorDialog(ioex.getMessage());
 		}
 	}
@@ -293,7 +296,7 @@ public class Starter {
 	private int parsePositionOrElse(String text, int orElse) {
 		if (!text.isEmpty()) {
 			try {
-				return Integer.parseInt(text) - 1; // user is never indexing from 0
+				return Integer.parseInt(text) - 1;
 			} catch (NumberFormatException nfex) {
 				return orElse;
 			}
