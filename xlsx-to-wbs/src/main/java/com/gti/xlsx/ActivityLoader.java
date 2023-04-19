@@ -21,9 +21,7 @@ import com.gti.xlsx.XlsxUtils.CellValue;
 public class ActivityLoader {
 
 	// A -> first column in first sheet
-	// D:% -> fourth column in the first sheet should be displayed as percentage
-
-	// TODO: split into smaller methods
+	// D% -> fourth column in the first sheet should be displayed as percentage
 
 	/**
 	 *

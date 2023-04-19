@@ -191,7 +191,6 @@ public class Starter {
 		frame.setJMenuBar(menuBar);
 	}
 
-	// TODO: refactor
 	private void displayManual() {
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.OPEN)) {
 			try {

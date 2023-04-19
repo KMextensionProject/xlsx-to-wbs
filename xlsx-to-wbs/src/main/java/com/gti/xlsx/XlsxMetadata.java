@@ -16,7 +16,6 @@ public class XlsxMetadata {
 	private List<ColumnProperty> propertyColumnsProperties;
 
 	public XlsxMetadata() {
-		// zeroes are default
 		parentColumnsProperties = new ArrayList<>();
 		propertyColumnsProperties = new ArrayList<>();
 	}

@@ -134,8 +134,7 @@ public class Wbs {
 			return config;
 		}
 
-		// TODO: add position labeling here
-		// TODO: display N/A values? let user specify which values to omit?
+		// display N/A values? let user specify which values to omit?
 		@SuppressWarnings("unchecked")
 		private void appendActivities(Map<String, Object> activities, StringBuilder configString, int level) {
 			int depth = level;
@@ -156,7 +155,6 @@ public class Wbs {
 			}
 		}
 
-		// TODO: refactor this mess
 		private String assignLevelNumber(int depth) {
 			if (depth < pos.size()) {
 				pos.add(depth, (Integer.parseInt((pos.remove(depth))) + 1) + "");
@@ -174,7 +172,6 @@ public class Wbs {
 			return pos.stream().skip(1).collect(joining(".")) + " ";
 		}
 
-		// TODO: refactor
 		private void appendTasks(StringBuilder configString, Set<Map<String, Object>> tasks) {
 			// line separator after task name must be removed so its properties are going into the same wbs box
 			configString.delete(configString.lastIndexOf(System.lineSeparator()), configString.length());
