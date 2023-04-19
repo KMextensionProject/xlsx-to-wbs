@@ -244,7 +244,7 @@ public class Starter {
 			wbs.save(outFile, (FileFormat) outputFileTypeCombo.getSelectedItem());
 			showInfoDialog("Generovanie dokončené", "WBS vytvorené: " + outFile);
 		} catch (Exception ioex) {
-			LOG.severe(() -> ioex.toString());
+			LOG.severe(ioex::toString);
 			showErrorDialog(ioex.getMessage());
 		}
 	}
