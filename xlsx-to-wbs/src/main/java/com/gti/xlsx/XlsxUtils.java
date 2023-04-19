@@ -53,7 +53,7 @@ public class XlsxUtils {
 
 	public static class CellValue {
 
-		private Object cellValue;
+		private Object cellContent;
 		private boolean isUndefined;
 		private boolean isNull;
 		private boolean isDate;
@@ -73,7 +73,7 @@ public class XlsxUtils {
 			if (value instanceof java.lang.Number) {
 				this.isNumeric = true;
 			}
-			cellValue = value;
+			cellContent = value;
 		}
 
 		public boolean isNull() {
@@ -93,16 +93,16 @@ public class XlsxUtils {
 		}
 
 		public String asString() {
-			return String.valueOf(cellValue);
+			return String.valueOf(cellContent);
 		}
 
 		public int asInt() {
-			if (cellValue instanceof String) {
-				return Double.valueOf((String) cellValue).intValue();
-			} else if (cellValue instanceof Number) {
-				return ((Number) cellValue).intValue();
+			if (cellContent instanceof String) {
+				return Double.valueOf((String) cellContent).intValue();
+			} else if (cellContent instanceof Number) {
+				return ((Number) cellContent).intValue();
 			}
-			throw new UnsupportedOperationException(cellValue + " cannot be converted to int");
+			throw new UnsupportedOperationException(cellContent + " cannot be converted to int");
 		}
 
 		/**
@@ -111,16 +111,16 @@ public class XlsxUtils {
 		 * away all fractional digits.
 		 */
 		public int asInt(DoubleUnaryOperator formattingFunction) {
-			return (int) formattingFunction.applyAsDouble((new CellValue(cellValue).asDouble()));
+			return (int) formattingFunction.applyAsDouble((new CellValue(cellContent).asDouble()));
 		}
 
 		public double asDouble() {
-			if (cellValue instanceof String) {
-				return Double.valueOf((String) cellValue).intValue();
-			} else if (cellValue instanceof Number) {
-				return ((Number) cellValue).doubleValue();
+			if (cellContent instanceof String) {
+				return Double.valueOf((String) cellContent).intValue();
+			} else if (cellContent instanceof Number) {
+				return ((Number) cellContent).doubleValue();
 			}
-			throw new UnsupportedOperationException(cellValue + " cannot be converted to double");
+			throw new UnsupportedOperationException(cellContent + " cannot be converted to double");
 		}
 
 		public LocalDate asLocalDate() {
@@ -129,23 +129,23 @@ public class XlsxUtils {
 
 		public LocalDate asLocalDate(DateTimeFormatter format) {
 			try {
-				if (cellValue instanceof String) {
-					String dateValue = (String) cellValue;
+				if (cellContent instanceof String) {
+					String dateValue = (String) cellContent;
 					if (format != null) {
 						return LocalDate.parse(dateValue, format);
 					}
 					return LocalDate.parse(dateValue);
-				} else if (cellValue instanceof java.util.Date) {
-					return new java.sql.Date(((java.util.Date) cellValue).getTime()).toLocalDate();
+				} else if (cellContent instanceof java.util.Date) {
+					return new java.sql.Date(((java.util.Date) cellContent).getTime()).toLocalDate();
 				}
 			} catch (DateTimeParseException parsingError) {
 				// parsingError skipped in favor of UnsupportedOperationException
 			}
-			throw new UnsupportedOperationException(cellValue + " cannot be converted to LocalDate");
+			throw new UnsupportedOperationException(cellContent + " cannot be converted to LocalDate");
 		}
 
 		public Object asObject() {
-			return this.cellValue;
+			return this.cellContent;
 		}
 
 		public <T> T conditionally(Predicate<T> condition, T trueValue, T falseValue) {
