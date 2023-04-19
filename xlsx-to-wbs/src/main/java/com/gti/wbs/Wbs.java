@@ -5,15 +5,12 @@ import static java.lang.System.lineSeparator;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import static java.util.stream.Collectors.joining;
 
 import com.gti.enums.TaskStatus;
+import com.gti.util.Positioner;
 
 import net.sourceforge.plantuml.FileFormat;
 import net.sourceforge.plantuml.FileFormatOption;
@@ -70,14 +67,14 @@ public class Wbs {
 	}
 
 	public static class WbsBuilder {
-		// TODO: move to a separate class -> check usage below
-		private final List<String> pos = new ArrayList<>(Arrays.asList(""));
 
 		private static final String WBS_START_TAG = "@startwbs";
 		private static final String WBS_END_TAG = "@endwbs";
-		private String boxingTag;
 
+		private final Positioner positioner = new Positioner();
 		private final Wbs config = new Wbs();
+
+		private String boxingTag;
 
 		/**
 		 *
@@ -141,7 +138,7 @@ public class Wbs {
 			for (Map.Entry<String, Object> entry : activities.entrySet()) {
 				configString.append(getLevelMark(depth))
 							.append(boxingTag)
-							.append(assignLevelNumber(depth))
+							.append(positioner.assignLevelNumber(depth))
 							.append(entry.getKey())
 							.append(System.lineSeparator());
 
@@ -153,23 +150,6 @@ public class Wbs {
 					appendTasks(configString, (Set<Map<String, Object>>) value);
 				}
 			}
-		}
-
-		private String assignLevelNumber(int depth) {
-			if (depth < pos.size()) {
-				pos.add(depth, (Integer.parseInt((pos.remove(depth))) + 1) + "");
-				for (int i = depth + 1; i < pos.size(); i++) {
-					pos.remove(i);
-				}
-			} else {
-				pos.add(1 + "");
-			}
-
-			for (int i = depth + 1; i < pos.size(); i++) {
-				pos.remove(i);
-			}
-
-			return pos.stream().skip(1).collect(joining(".")) + " ";
 		}
 
 		private void appendTasks(StringBuilder configString, Set<Map<String, Object>> tasks) {
