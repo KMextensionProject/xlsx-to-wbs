@@ -3,9 +3,9 @@ package com.gti.xlsx;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -110,8 +110,8 @@ public class XlsxUtils {
 		 * value. This method automatically extracts the integer value throwing
 		 * away all fractional digits.
 		 */
-		public int asInt(UnaryOperator<Double> formattingFunction) {
-			return formattingFunction.apply(new CellValue(cellValue).asDouble()).intValue();
+		public int asInt(DoubleUnaryOperator formattingFunction) {
+			return (int) formattingFunction.applyAsDouble((new CellValue(cellValue).asDouble()));
 		}
 
 		public double asDouble() {
