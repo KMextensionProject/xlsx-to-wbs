@@ -78,12 +78,7 @@ public class CustomComponentCreator {
 		textField.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent keyEvent) {
-				int keyChar = keyEvent.getKeyChar();
-				if ((keyChar == KeyEvent.VK_BACK_SPACE || keyChar == KeyEvent.VK_DELETE) || (keyChar <= '9' && keyChar >= '0')) {
-					textField.setEditable(true);
-				} else {
-					textField.setEditable(false);
-				}
+				textField.setEditable(isNumberPressed(keyEvent));
 			}
 		});
 		if (Integer.MIN_VALUE != defaultValue) {
@@ -93,6 +88,11 @@ public class CustomComponentCreator {
 			textField.setToolTipText(hint);
 		}
 		return textField;
+	}
+
+	private static boolean isNumberPressed(KeyEvent keyEvent) {
+		int keyChar = keyEvent.getKeyChar();
+		return (keyChar == KeyEvent.VK_BACK_SPACE || keyChar == KeyEvent.VK_DELETE) || (keyChar <= '9' && keyChar >= '0');
 	}
 
 	public static FileDialog createFileDialog(Frame parent, String title, int dialogType) {
