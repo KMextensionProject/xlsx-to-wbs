@@ -22,6 +22,10 @@ import javax.swing.SwingConstants;
 
 public class CustomComponentCreator {
 
+	private CustomComponentCreator() {
+		throw new IllegalStateException("This utility class was not designed to be instantiated");
+	}
+
 	public static JFrame createFrame(int width, int height) {
 		JFrame frame = new JFrame("xlsx-to-wbs");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

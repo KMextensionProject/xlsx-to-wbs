@@ -5,6 +5,10 @@ import java.text.Normalizer.Form;
 
 public class StringUtils {
 
+	private StringUtils() {
+		throw new IllegalStateException("This utility class was not designed to be instantiated");
+	}
+
 	public static final String EMPTY_STRING = "";
 
 	public static String stripDiacritics(String input) {

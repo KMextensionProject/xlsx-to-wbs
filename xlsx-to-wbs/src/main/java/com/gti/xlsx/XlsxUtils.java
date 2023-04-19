@@ -12,6 +12,10 @@ import org.apache.poi.ss.usermodel.DateUtil;
 
 public class XlsxUtils {
 
+	private XlsxUtils() {
+		throw new IllegalStateException("This utility class was not designed to be instantiated");
+	}
+
 	public static CellValue getCellValue(Cell cell) {
 		Object cellValue;
 		int cellType = cell.getCellType();
