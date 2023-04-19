@@ -6,8 +6,8 @@ public class NoMappingFound extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	private String columnName;
-	private int columnIndex;
+	private final String columnName;
+	private final int columnIndex;
 
 	public NoMappingFound(String forName) {
 		this.columnName = forName;
