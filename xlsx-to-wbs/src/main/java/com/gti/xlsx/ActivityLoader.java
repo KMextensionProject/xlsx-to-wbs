@@ -53,7 +53,7 @@ public class ActivityLoader {
 					parent.put(value, new LinkedHashMap<>());
 				}
 				// I need the last reference later, so omit the value extraction in the last iteration
-				if (!(j == parentColumns.size() - 1)) {
+				if (j != parentColumns.size() - 1) {
 					parent = (Map<String, Object>) parent.get(value);
 				}
 			}
