@@ -88,18 +88,7 @@ public class Starter {
 	public Starter() {
 		activityLoader = new ActivityLoader();
 		setTheme(new FlatLightLaf());
-		createUI();
-	}
 
-	private void setTheme(LookAndFeel lookAndFeel) {
-		try {
-			UIManager.setLookAndFeel(lookAndFeel);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
-
-	private void createUI() {
 		frame = createFrame(485, 420);
 		panel = createPanel(485, 420);
 		addFrameMenuBar();
@@ -176,6 +165,14 @@ public class Starter {
 		frame.add(panel);
 		frame.setResizable(false);
 		frame.setVisible(true);
+	}
+
+	private void setTheme(LookAndFeel lookAndFeel) {
+		try {
+			UIManager.setLookAndFeel(lookAndFeel);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	private void addFrameMenuBar() {
