@@ -24,10 +24,13 @@ public class ActivityLoader {
 	// D% -> fourth column in the first sheet should be displayed as percentage
 
 	/**
+	 * Loads the activities data from XLSX file and forms the desired hierarchy as
+	 * described by XlsxMetadata object.
 	 *
-	 * @param xlsxMeta
+	 * @param xlsxMeta - description object of how to construct hierachy from XLSX
+	 *                 columns and how name columns by the title row
 	 * @return
-	 * @throws IOException
+	 * @throws IOException - if there is some problem reading XLSX file
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> loadFromXlsx (XlsxMetadata xlsxMeta) throws IOException {
@@ -52,7 +55,7 @@ public class ActivityLoader {
 				}
 				// I need the last reference later, so omit the value extraction in the last iteration
 				if (j != parentColumns.size() - 1) {
-					parent = (Map<String, Object>) parent.get(value);
+					parent =  (Map<String, Object>) parent.get(value);
 				}
 			}
 
@@ -85,6 +88,7 @@ public class ActivityLoader {
 
 	private Object resolveTaskValue(CellValue cellValue, ColumnProperty columnProperty) {
 		if (cellValue.isDate()) {
+			// TODO: let user define format according to what excel supports
 			return cellValue.asLocalDate().format(DateFormat.SLOVAK_DATE_FORMAT);
 		} else if (cellValue.isNumeric()) {
 			return columnProperty.hasPercentageIndicator() 

@@ -38,6 +38,10 @@ public class XlsxMetadata {
 		return this.file;
 	}
 
+	/**
+	 * Set sheet index where to look for data to be loaded.<br>
+	 * Index positions start with 0.
+	 */
 	public void setDataSheetIndex(int dataSheetIndex) {
 		this.dataSheetIndex = dataSheetIndex;
 	}
@@ -46,6 +50,10 @@ public class XlsxMetadata {
 		return this.dataSheetIndex;
 	}
 
+	/**
+	 * Set the title row index, to correctly name the data in columns.<br>
+	 * Index positions start with 0.
+	 */
 	public void setTitleRowIndex(int titleRowIndex) {
 		this.titleRowIndex = titleRowIndex;
 	}
@@ -62,6 +70,10 @@ public class XlsxMetadata {
 		return new ArrayList<>(propertyColumnsProperties);
 	}
 
+	/**
+	 * Sets the parent column code list to define main hierarchy.
+	 * This method is null safe.
+	 */
 	public void setParentColumnsProperties(List<ColumnProperty> parentCols) {
 		if (parentColumnsProperties != null) {
 			if (this.parentColumnsProperties.isEmpty()) {
@@ -72,6 +84,13 @@ public class XlsxMetadata {
 		}
 	}
 
+	/**
+	 * Sets the properties column codes of the last parent column in main
+	 * hierarchy.<br>
+	 * i.e. If the main hierarchy's last element is the column code 'H', then it is
+	 * considered that this 'H' element is consisting of all the columns specified
+	 * within this list.
+	 */
 	public void setPropertyColumnsProperties(List<ColumnProperty> propertyCols) {
 		if (propertyCols != null) {
 			if (this.propertyColumnsProperties.isEmpty()) {

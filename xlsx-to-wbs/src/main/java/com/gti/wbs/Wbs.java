@@ -33,6 +33,10 @@ public class Wbs {
 		return this.boxed;
 	}
 
+	/**
+	 * @return {@code true} if the coloring based on the mapping in the TaskStatus
+	 *         enum is used with this Wbs diagram, {@code false} otherwise.
+	 */
 	public boolean hasStatusColoring() {
 		return this.statusColoring;
 	}
@@ -41,6 +45,10 @@ public class Wbs {
 		return this.topLevelNodeName;
 	}
 
+	/**
+	 * @return the underlying plantuml script which is used to generate Wbs diagram.
+	 *         The script contains styles and data provided during object building.
+	 */
 	public String getConfigurationString() {
 		return this.configuration;
 	}
@@ -50,10 +58,13 @@ public class Wbs {
 	}
 
 	/**
-	 * 
+	 * Generates the Wbs diagram from underlying plantuml script and saves it on
+	 * file system in desired format listed in {@linkplain FileFormat} enum.
+	 *
 	 * @param outputFile
 	 * @param fileFormat
-	 * @return
+	 * @return result from delegated planuml engine or error message if IOException
+	 *         occurs
 	 */
 	public String save(String outputFile, FileFormat fileFormat) {
 		SourceStringReader reader = new SourceStringReader(getConfigurationString());
@@ -77,8 +88,8 @@ public class Wbs {
 		private String boxingTag;
 
 		/**
-		 *
-		 * @param boxed
+		 * Make the node surrounded by borders or display it as plain text.
+		 * @param boxed - defaults to {@code true}
 		 */
 		public WbsBuilder makeBoxed(boolean boxed) {
 			config.boxed = boxed;
@@ -94,7 +105,7 @@ public class Wbs {
 		}
 
 		/**
-		 *
+		 * Assign text appearing in top level node.
 		 */
 		public WbsBuilder withTopLevelNodeName(String topLevelNodeName) {
 			config.topLevelNodeName = topLevelNodeName;
@@ -102,7 +113,8 @@ public class Wbs {
 		}
 
 		/**
-		 *
+		 * Apply node style such as coloring, shadowing, node rounding,
+		 * text alignment etc.
 		 */
 		public WbsBuilder withNodeStyle(NodeStyle nodeStyle) {
 			config.nodeStyle = nodeStyle;
@@ -110,7 +122,7 @@ public class Wbs {
 		}
 
 		/**
-		 *
+		 * Builds the Wbs object and generates plantuml script from provided non-empty map.
 		 * @param data
 		 * @return
 		 */
