@@ -14,8 +14,8 @@ public enum TaskStatus {
 	private String value;
 	private String colorCode;
 
-	private TaskStatus(String value) {
-		this(value, EMPTY_STRING);
+	private TaskStatus(String status) {
+		this(status, EMPTY_STRING);
 	}
 
 	private TaskStatus(String value, String colorCode) {
